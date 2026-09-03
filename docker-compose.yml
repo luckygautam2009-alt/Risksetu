@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: risksetu_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-risksetu}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-risksetu}
+      POSTGRES_DB: ${POSTGRES_DB:-risksetu}
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - risksetu_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U risksetu -d risksetu"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: risksetu_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: risksetu_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-risksetu}:${POSTGRES_PASSWORD:-risksetu}@db:5432/${POSTGRES_DB:-risksetu}}
+      REDIS_URL: ${DOCKER_REDIS_URL:-redis://redis:6379/0}
+
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  risksetu_pg_data:
