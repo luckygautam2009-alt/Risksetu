@@ -8,7 +8,7 @@ following `RISKSETU_AI_ULTIMATE_MASTER_BUILD.md` (the full specification —
 keep it alongside this repo; every phase's Definition of Done is defined
 there in §26).
 
-## Status: Phase 0 — Foundation ✅
+## Status: Phase 0 — Foundation 
 
 What exists right now:
 - FastAPI app skeleton (`app/main.py`) with CORS, request-correlation
