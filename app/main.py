@@ -34,5 +34,9 @@ app.add_middleware(
 )
 app.add_middleware(RequestContextMiddleware)
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "risksetu-api", "docs": "/api/v1/health"}
+
 register_exception_handlers(app)
 app.include_router(api_router, prefix=settings.api_v1_prefix)

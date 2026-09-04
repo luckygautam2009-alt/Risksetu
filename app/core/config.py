@@ -8,9 +8,9 @@ engine weights, rate limits) reads from this module instead of scattering
 constants across services.
 """
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _INSECURE_SECRET_PATTERNS = {
@@ -61,7 +61,22 @@ class Settings(BaseSettings):
     default_rate_limit_per_minute: int = 60
 
     # --- CORS ---
-    cors_allow_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    cors_allow_origins: list[str] | str = Field(default_factory=lambda: ["http://localhost:5173"])
+
+    @field_validator("cors_allow_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> list[str]:
+        """Allow CORS origins to be specified as JSON array string or comma-separated string."""
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("[") and v.endswith("]"):
+                import json
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     # --- Observability ---
     log_level: str = "INFO"
@@ -76,7 +91,13 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_environment_safety(self) -> "Settings":
-        """Validate production and staging environments have secure configurations."""
+        """Validate production/staging configurations and normalize cloud provider DB URLs."""
+        # Normalize Render/Heroku postgres:// scheme to postgresql+psycopg2://
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+        elif self.database_url.startswith("postgresql://") and not self.database_url.startswith("postgresql+"):
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
         if self.app_env in ("production", "staging"):
             secret = self.jwt_secret_key.strip()
             secret_lower = secret.lower()

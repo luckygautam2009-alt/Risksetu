@@ -268,6 +268,66 @@ Interactive API documentation will be available at:
 
 ---
 
+## Deploying on Render.com
+
+RISKSETU AI is structured as a monorepo containing a **FastAPI backend** (`/app`) and a **React 19 + Vite frontend** (`/frontend`). On Render.com, the recommended architecture deploys the backend as a **Docker Web Service** and the frontend as a **Static Site**.
+
+```
+[User Browser] ───> Frontend Static Site (https://<frontend-app>.onrender.com)
+                          │
+                          ▼ (API calls routed via VITE_API_BASE_URL)
+                    Backend Web Service (https://<backend-api>.onrender.com)
+                          │
+                          ▼
+                    PostgreSQL + PostGIS Database
+```
+
+### Option A: 1-Click Render Blueprint (Fastest)
+
+This repository includes a [`render.yaml`](render.yaml) specification:
+1. In Render Dashboard, click **New +** → **Blueprint**.
+2. Connect your GitHub repository (`https://github.com/luckygautam2009-alt/Risksetu.git`).
+3. Render automatically provisions the PostgreSQL database, Docker backend Web Service, and React Static Site with all inter-service URLs linked.
+
+---
+
+### Option B: Manual Setup via Render Dashboard
+
+#### 1. Backend Web Service (FastAPI)
+- **Service Type**: Web Service
+- **Name**: `risksetu-backend` (or `risksetu-api`)
+- **Runtime / Environment**: `Docker`
+- **Dockerfile Path**: `./Dockerfile`
+- **Health Check Path**: `/api/v1/health`
+- **Environment Variables**:
+  | Variable | Value / Description |
+  | :--- | :--- |
+  | `APP_ENV` | `production` |
+  | `DATABASE_URL` | Render PostgreSQL internal connection string (Render `postgres://` URLs are automatically converted to `postgresql+psycopg2://`) |
+  | `JWT_SECRET_KEY` | Cryptographically secure string with 32+ characters |
+  | `CORS_ALLOW_ORIGINS` | Comma-separated or JSON list of frontend origins (e.g. `https://risksetu-frontend.onrender.com,http://localhost:5173`) |
+  | `OFFLINE_DEMO_MODE` | `true` |
+  | `PORT` | Auto-injected by Render (the Dockerfile dynamically starts uvicorn on `${PORT:-8000}`) |
+
+> **Health Verification**: Visiting `https://<your-backend>.onrender.com/` returns:
+> ```json
+> {"status": "ok", "service": "risksetu-api", "docs": "/api/v1/health"}
+> ```
+
+#### 2. Frontend Static Site (React + Vite)
+- **Service Type**: Static Site
+- **Name**: `risksetu-frontend`
+- **Root Directory**: `frontend`
+- **Build Command**: `npm install && npm run build`
+- **Publish Directory**: `dist`
+- **SPA Rewrite Rule**: Under **Redirects/Rewrites**, add `/*` → `/index.html` (Action: `Rewrite`)
+- **Environment Variables**:
+  | Variable | Value / Description |
+  | :--- | :--- |
+  | `VITE_API_BASE_URL` | Your deployed backend URL (e.g., `https://risksetu-backend.onrender.com`). **Must not be left empty in production**, otherwise requests default to relative paths. |
+
+---
+
 ## API Endpoints & Contracts
 
 All endpoints adhere to a standardized `{ data, meta }` response envelope:
