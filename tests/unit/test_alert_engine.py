@@ -41,10 +41,15 @@ def db_session():
         db.commit()
         yield db
     finally:
-        db.execute(text("DELETE FROM alert_audits WHERE 1=1;"))
-        db.execute(text("DELETE FROM alerts WHERE 1=1;"))
-        db.commit()
-        db.close()
+        db.rollback()
+        try:
+            db.execute(text("DELETE FROM alert_audits WHERE 1=1;"))
+            db.execute(text("DELETE FROM alerts WHERE 1=1;"))
+            db.commit()
+        except Exception:
+            db.rollback()
+        finally:
+            db.close()
 
 
 @pytest.fixture
