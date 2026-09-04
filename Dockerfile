@@ -1,3 +1,12 @@
+# --- Stage 1: Build React 19 + Vite Frontend ---
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# --- Stage 2: Python Backend & Unified Production Image ---
 FROM python:3.11-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,8 +25,10 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml poetry.lock* ./
 RUN poetry install --no-root --only main --no-interaction --no-ansi
 
-
 COPY . .
+
+# Copy built frontend production bundle from stage 1 into frontend/dist
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 8000
 

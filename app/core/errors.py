@@ -19,13 +19,17 @@ from __future__ import annotations
 from typing import Any
 import uuid
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 import structlog
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = structlog.get_logger("risksetu.errors")
+
+_FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
 _HTTP_STATUS_CODE_MAP = {
     status.HTTP_400_BAD_REQUEST: "BAD_REQUEST",
@@ -148,7 +152,18 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(StarletteHTTPException)
     async def handle_http_exception(
         request: Request, exc: StarletteHTTPException
-    ) -> JSONResponse:
+    ) -> Response:
+        # Non-API 404: Attempt to serve frontend SPA client route or static asset
+        if exc.status_code == status.HTTP_404_NOT_FOUND and not request.url.path.startswith("/api"):
+            rel_path = request.url.path.lstrip("/")
+            static_file = _FRONTEND_DIST / rel_path
+            if rel_path and static_file.is_file():
+                return FileResponse(str(static_file))
+
+            index_file = _FRONTEND_DIST / "index.html"
+            if index_file.is_file():
+                return FileResponse(str(index_file))
+
         rid = _request_id(request)
         code = _HTTP_STATUS_CODE_MAP.get(exc.status_code, f"HTTP_{exc.status_code}")
         logger.warning(

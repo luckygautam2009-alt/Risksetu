@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+.DS_Store
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+scratch
+database/*.xlsx
+database/*.pdf
+database/*.osm.pbf
+frontend/node_modules
+frontend/dist
