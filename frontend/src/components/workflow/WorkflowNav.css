@@ -1,0 +1,135 @@
+/* ── Continuous Intelligence Workflow Bar — Mission Control Ribbon ── */
+
+.wf-nav {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  z-index: 25;
+  pointer-events: auto;
+  animation: fade-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 100ms;
+}
+
+.wf-nav__dock {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(24, 34, 48, 0.10);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.wf-nav__title {
+  font-size: var(--font-size-2xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-subtle);
+  padding: 0 8px 0 6px;
+  border-right: 1px solid var(--color-border-subtle);
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.wf-nav__steps {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.wf-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.wf-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  position: relative;
+}
+
+.wf-nav__btn:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.wf-nav__btn--active {
+  background: var(--color-text-primary);
+  color: #ffffff;
+  border-color: var(--color-text-primary);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+}
+
+.wf-nav__btn--active:hover {
+  background: #1e293b;
+}
+
+.wf-nav__num {
+  font-size: var(--font-size-2xs);
+  font-weight: 700;
+  opacity: 0.5;
+  letter-spacing: 0.02em;
+}
+
+.wf-nav__btn--active .wf-nav__num {
+  opacity: 0.6;
+}
+
+.wf-nav__label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+
+.wf-nav__badge {
+  font-size: var(--font-size-2xs);
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+}
+
+.wf-nav__btn:not(.wf-nav__btn--active) .wf-nav__badge {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.wf-nav__badge--alert {
+  background: var(--color-risk-critical) !important;
+  color: #ffffff !important;
+  animation: badge-alert-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes badge-alert-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(142, 28, 46, 0.4); }
+  50% { box-shadow: 0 0 0 3px rgba(142, 28, 46, 0); }
+}
+
+.wf-nav__arrow {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-border-strong);
+  user-select: none;
+  padding: 0 1px;
+}

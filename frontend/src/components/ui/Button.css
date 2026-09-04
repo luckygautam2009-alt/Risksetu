@@ -1,0 +1,161 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Sizes */
+.btn--xs {
+  padding: 0.2rem 0.45rem;
+  font-size: var(--font-size-2xs);
+  gap: 0.25rem;
+}
+
+.btn--sm {
+  padding: 0.3125rem 0.65rem;
+  font-size: var(--font-size-xs);
+}
+
+.btn--md {
+  padding: 0.4375rem 0.875rem;
+  font-size: var(--font-size-sm);
+}
+
+.btn--lg {
+  padding: 0.6rem 1.125rem;
+  font-size: var(--font-size-base);
+}
+
+/* Default Variant */
+.btn--default {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-subtle);
+}
+
+.btn--default:hover:not(:disabled) {
+  background-color: var(--color-bg-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+/* Primary Variant (Authoritative GIS Navy) */
+.btn--primary {
+  background-color: var(--color-text-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-text-primary);
+  box-shadow: var(--shadow-panel);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-text-secondary);
+  border-color: var(--color-text-secondary);
+}
+
+/* Secondary (Geospatial Blue) */
+.btn--secondary {
+  background-color: var(--color-geo-blue);
+  color: var(--color-text-inverse);
+  border-color: var(--color-geo-blue);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: #355373;
+}
+
+/* Subtle Variant */
+.btn--subtle {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-subtle);
+}
+
+.btn--subtle:hover:not(:disabled) {
+  background-color: var(--color-border-subtle);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+/* Outline Variant */
+.btn--outline {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+/* Ghost Variant */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border-color: transparent;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: rgba(24, 34, 48, 0.04);
+  color: var(--color-text-primary);
+}
+
+/* Danger Variant */
+.btn--danger {
+  background-color: var(--color-risk-critical-bg);
+  color: var(--color-risk-critical);
+  border-color: var(--color-risk-critical-border);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--color-risk-critical);
+  color: var(--color-text-inverse);
+}
+
+/* Active Toggle State */
+.btn.btn--active {
+  background-color: var(--color-geo-blue-subtle);
+  color: var(--color-geo-blue);
+  border-color: color-mix(in srgb, var(--color-geo-blue) 45%, transparent);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 1px 2px rgba(68, 104, 142, 0.12);
+}
+
+.btn.btn--active:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--color-geo-blue) 14%, white);
+}
+
+/* Disabled */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn__icon,
+.btn__icon-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+

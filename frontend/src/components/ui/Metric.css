@@ -1,0 +1,98 @@
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.metric__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+.metric__label {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.metric__trend {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.metric__trend--up {
+  color: var(--color-risk-high);
+}
+
+.metric__trend--down {
+  color: var(--color-risk-low);
+}
+
+.metric__trend--stable {
+  color: var(--color-text-subtle);
+}
+
+.metric__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  line-height: 1;
+}
+
+.metric__value {
+  font-size: var(--font-size-metric);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.metric__unit {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.metric__secondary {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+  line-height: 1.3;
+}
+
+/* Sizes */
+.metric--sm .metric__value {
+  font-size: 1.25rem;
+}
+
+.metric--md .metric__value {
+  font-size: 1.875rem;
+}
+
+.metric--lg .metric__value {
+  font-size: 2.25rem;
+}
+
+/* Semantic Risk Numerals */
+.metric--risk-low .metric__value {
+  color: var(--color-risk-low);
+}
+
+.metric--risk-moderate .metric__value {
+  color: var(--color-risk-moderate);
+}
+
+.metric--risk-high .metric__value {
+  color: var(--color-risk-high);
+}
+
+.metric--risk-critical .metric__value {
+  color: var(--color-risk-critical);
+}
+

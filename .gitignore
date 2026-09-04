@@ -18,3 +18,12 @@ htmlcov/
 .idea/
 .vscode/
 data/seed/*.local.*
+
+# Large raw datasets (>100MB exceeds GitHub push limits; see dataset_inventory.json)
+database/2011-IndiaStateDistSbDistVill-0000.xlsx
+database/landslide_report.pdf
+database/northern-zone-260903.osm.pbf
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/

@@ -1,0 +1,139 @@
+:root {
+  /* Surfaces & Backgrounds (Light Premium Cartographic) */
+  --color-bg-canvas: #f8f7f4;
+  --color-bg-subtle: #f3f2ee;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-hover: #fbfbfa;
+  --color-bg-floating: rgba(255, 255, 255, 0.90);
+  --color-bg-floating-opaque: #ffffff;
+  --color-bg-dock: rgba(255, 255, 255, 0.94);
+  --color-bg-map: #e8e6e0;
+
+  /* Backward-compatible surface aliases */
+  --color-bg-primary: var(--color-bg-canvas);
+  --color-bg-secondary: var(--color-bg-subtle);
+  --color-bg-elevated: var(--color-bg-surface);
+
+  /* Typography Colors (Authoritative Charcoal & Navy) */
+  --color-text-primary: #182230;
+  --color-text-secondary: #3e4d5f;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Borders & Dividers */
+  --color-border: #e2dfd7;
+  --color-border-subtle: #eceae4;
+  --color-border-strong: #cfcbbe;
+  --color-border-glass: rgba(24, 34, 48, 0.08);
+  --color-border-focus: #44688e;
+
+  /* Geospatial Information Palette (Muted, Topographic, Scientific) */
+  --color-geo-blue: #44688e;
+  --color-geo-blue-subtle: #edf3f8;
+  --color-geo-teal: #2f7575;
+  --color-geo-teal-subtle: #eaf4f4;
+  --color-geo-sage: #5e8463;
+  --color-geo-sage-subtle: #eff6f0;
+  --color-geo-earth: #7d6346;
+  --color-geo-earth-subtle: #f6f1eb;
+  --color-earth-light: #c4b5a0;
+
+  /* Backward-compatible geo aliases */
+  --color-blue-muted: var(--color-geo-blue);
+  --color-teal: var(--color-geo-teal);
+  --color-sage: var(--color-geo-sage);
+  --color-earth: var(--color-geo-earth);
+
+  /* Semantic Risk Colors (Strictly for Risk Indicators) */
+  --color-risk-low: #3b7a57;
+  --color-risk-low-bg: rgba(59, 122, 87, 0.09);
+  --color-risk-low-border: rgba(59, 122, 87, 0.28);
+
+  --color-risk-moderate: #b0821e;
+  --color-risk-mod-bg: rgba(176, 130, 30, 0.10);
+  --color-risk-mod-border: rgba(176, 130, 30, 0.28);
+
+  --color-risk-high: #c24d2c;
+  --color-risk-high-bg: rgba(194, 77, 44, 0.10);
+  --color-risk-high-border: rgba(194, 77, 44, 0.28);
+
+  --color-risk-critical: #8e1c2e;
+  --color-risk-critical-bg: rgba(142, 28, 46, 0.11);
+  --color-risk-critical-border: rgba(142, 28, 46, 0.32);
+
+  /* System Telemetry Status */
+  --color-status-operational: #2e7d6b;
+  --color-status-operational-glow: rgba(46, 125, 107, 0.35);
+  --color-status-calibrating: #44688e;
+  --color-status-degraded: #b0821e;
+  --color-status-offline: #8e1c2e;
+
+  /* Typography Scales */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-family: var(--font-sans);
+
+  --font-size-2xs: 0.625rem;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.8125rem;
+  --font-size-md: 0.875rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-size-metric: 1.875rem;
+
+  /* Legacy typography aliases */
+  --font-size-app-title: 1.125rem;
+  --font-size-section: 0.8125rem;
+  --font-size-location: 0.9375rem;
+  --font-size-metadata: 0.75rem;
+  --font-size-label: 0.6875rem;
+  --font-size-source: 0.625rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
+  --letter-spacing-wider: 0.09em;
+
+  /* Spacing Scale */
+  --space-2xs: 0.125rem;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+  --space-2xl: 2rem;
+
+  /* Layout Dimensions */
+  --header-height: 3.5rem;
+  --layer-dock-height: 3.25rem;
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-pill: 9999px;
+
+  /* Elevation Shadows */
+  --shadow-subtle: 0 1px 2px rgba(24, 34, 48, 0.04);
+  --shadow-panel: 0 1px 3px rgba(24, 34, 48, 0.05), 0 3px 8px rgba(24, 34, 48, 0.03);
+  --shadow-floating: 0 4px 18px -2px rgba(24, 34, 48, 0.08), 0 2px 6px -1px rgba(24, 34, 48, 0.04);
+  --shadow-floating-lg: 0 10px 30px -4px rgba(24, 34, 48, 0.12), 0 4px 10px -2px rgba(24, 34, 48, 0.05);
+
+  /* Glassmorphism */
+  --backdrop-blur-panel: blur(12px);
+  --backdrop-blur-dock: blur(14px);
+
+  /* Transitions */
+  --transition-fast: 130ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-demo: 380ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-panel: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+

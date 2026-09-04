@@ -38,14 +38,21 @@ async def readiness(response: Response) -> dict[str, Any]:
     """
     checks: dict[str, str] = {"database": "unknown", "redis": "unknown"}
 
-    # 1. Probe database connectivity with a lightweight query
+    # 1. Probe database connectivity and PostGIS capability
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
+            # Probe PostGIS availability
+            try:
+                conn.execute(text("SELECT PostGIS_Version()"))
+                checks["postgis"] = "ok"
+            except Exception:
+                checks["postgis"] = "unavailable"
         checks["database"] = "ok"
     except Exception as exc:  # noqa: BLE001
         logger.warning("readiness_db_failure", error_type=type(exc).__name__)
         checks["database"] = "error"
+        checks["postgis"] = "error"
 
     # 2. Probe Redis connectivity via pooled health check
     if check_redis_connection(timeout_seconds=1.0):

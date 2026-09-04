@@ -1,0 +1,123 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+  line-height: 1.2;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+/* Sizes */
+.badge--sm {
+  padding: 0.1rem 0.35rem;
+  font-size: var(--font-size-2xs);
+}
+
+.badge--md {
+  padding: 0.15rem 0.5rem;
+  font-size: var(--font-size-xs);
+}
+
+/* Default */
+.badge--default {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  border-color: var(--color-border-subtle);
+}
+
+/* Source Feeds (GSI, IMD, OSM) */
+.badge--source {
+  background-color: transparent;
+  color: var(--color-text-subtle);
+  border-color: var(--color-border);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-wider);
+}
+
+.badge--source:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* Telemetry & Sensor Feeds */
+.badge--telemetry {
+  background-color: var(--color-geo-blue-subtle);
+  color: var(--color-geo-blue);
+  border-color: color-mix(in srgb, var(--color-geo-blue) 25%, transparent);
+  font-family: var(--font-mono);
+}
+
+/* Accent (Teal / Earth) */
+.badge--accent {
+  background-color: var(--color-geo-teal-subtle);
+  color: var(--color-geo-teal);
+  border-color: color-mix(in srgb, var(--color-geo-teal) 25%, transparent);
+}
+
+/* Outline */
+.badge--outline {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+/* Semantic Risk Hierarchy */
+.badge--risk-low {
+  background-color: var(--color-risk-low-bg);
+  color: var(--color-risk-low);
+  border-color: var(--color-risk-low-border);
+}
+
+.badge--risk-moderate {
+  background-color: var(--color-risk-mod-bg);
+  color: var(--color-risk-moderate);
+  border-color: var(--color-risk-mod-border);
+}
+
+.badge--risk-high {
+  background-color: var(--color-risk-high-bg);
+  color: var(--color-risk-high);
+  border-color: var(--color-risk-high-border);
+}
+
+.badge--risk-critical {
+  background-color: var(--color-risk-critical-bg);
+  color: var(--color-risk-critical);
+  border-color: var(--color-risk-critical-border);
+}
+
+/* Badge Dot */
+.badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+.badge--pulse .badge__dot {
+  animation: badge-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+

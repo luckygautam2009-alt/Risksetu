@@ -1,0 +1,278 @@
+{
+  "inspection_timestamp": "2026-09-04T09:25:00+05:30",
+  "project": "RISKSETU AI",
+  "problem_statement": "SIH 2026 PS ID 26001",
+  "data_directory": "/Users/yashgautam/Desktop/risksetu/database",
+  "inventory_summary": {
+    "total_files_discovered": 7,
+    "total_raw_storage_bytes": 806847243,
+    "total_raw_storage_mb": 769.47,
+    "categories_discovered": [
+      "Historical Landslide Inventory",
+      "Sub-Divisional Meteorological Rainfall",
+      "Disaster Impact & Damage Statistics",
+      "Primary Census Abstract (PCA) 2011",
+      "Census Table A-1 Administrative Aggregates",
+      "OpenStreetMap Transportation Network"
+    ],
+    "missing_expected_sources": [
+      {
+        "source": "ISRO / NRSC Bhoonidhi DEM",
+        "status": "NOT AVAILABLE IN SOURCE DATA",
+        "description": "No GeoTIFF raster DEM was present in the data directory."
+      }
+    ]
+  },
+  "datasets": [
+    {
+      "id": "gsi_landslide_inventory",
+      "filename": "landslide_report.pdf",
+      "filepath": "database/landslide_report.pdf",
+      "file_type": "PDF Document (v1.7)",
+      "file_size_bytes": 247468068,
+      "file_size_mb": 236.0,
+      "source": "Geological Survey of India (GSI) / Bhukosh NLSM",
+      "category": "Landslide Inventory",
+      "nature": "Tabular dataset stored within 904-page PDF document",
+      "records_count": 31509,
+      "columns_count": 11,
+      "columns": [
+        "Sl.No.",
+        "Slide_No",
+        "State",
+        "District",
+        "Slide_Name",
+        "NH_SH_Location",
+        "Latitude",
+        "Longitude",
+        "Material Involved",
+        "Movement Type",
+        "History"
+      ],
+      "crs": "EPSG:4326 (WGS 84)",
+      "geometry_type": "Point (Latitude, Longitude)",
+      "bounding_box": {
+        "min_latitude": 8.49,
+        "max_latitude": 34.7583,
+        "min_longitude": 72.9211,
+        "max_longitude": 96.6172
+      },
+      "temporal_coverage": {
+        "earliest": "Historical pre-2000",
+        "latest": "2021",
+        "records_with_date": 9853,
+        "date_availability_pct": 31.27
+      },
+      "direct_ingestion_ready": true,
+      "ingestion_prerequisite": "PDF structured stream CMap text parser required"
+    },
+    {
+      "id": "imd_subdivision_rainfall",
+      "filename": "Sub_Division_IMD_2017.csv",
+      "filepath": "database/Sub_Division_IMD_2017.csv",
+      "file_type": "CSV Text",
+      "file_size_bytes": 445369,
+      "file_size_mb": 0.42,
+      "source": "India Meteorological Department (IMD) / data.gov.in",
+      "category": "Rainfall",
+      "nature": "Sub-divisional monthly and seasonal rainfall time series",
+      "records_count": 4188,
+      "columns_count": 19,
+      "columns": [
+        "SUBDIVISION",
+        "YEAR",
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+        "ANNUAL",
+        "JF",
+        "MAM",
+        "JJAS",
+        "OND"
+      ],
+      "spatial_granularity": "36 Meteorological Subdivisions",
+      "temporal_granularity": "Monthly / Seasonal / Annual",
+      "temporal_coverage": {
+        "earliest_year": 1901,
+        "latest_year": 2017,
+        "span_years": 117
+      },
+      "units": "Millimeters (mm)",
+      "missing_percentage": 0.21,
+      "duplicates": 0,
+      "direct_ingestion_ready": true
+    },
+    {
+      "id": "rs_parliament_disaster_loss",
+      "filename": "RS_Session_255_AU_353.csv",
+      "filepath": "database/RS_Session_255_AU_353.csv",
+      "file_type": "CSV Text",
+      "file_size_bytes": 645,
+      "file_size_mb": 0.0006,
+      "source": "Rajya Sabha Unstarred Question AU 353 (Session 255)",
+      "category": "Disaster Damage & Loss",
+      "nature": "State-level disaster loss table",
+      "records_count": 26,
+      "columns_count": 4,
+      "columns": [
+        "Sl. No.",
+        "State/UT",
+        "Human Lives Lost (Number)",
+        "Crops Area Affected (in lakh ha.)"
+      ],
+      "direct_ingestion_ready": true
+    },
+    {
+      "id": "mha_annual_disaster_losses",
+      "filename": "disaster_dataset_1.xls",
+      "filepath": "database/disaster_dataset_1.xls",
+      "file_type": "Microsoft Excel 97-2004 (BIFF8 / OLE)",
+      "file_size_bytes": 25600,
+      "file_size_mb": 0.024,
+      "source": "Ministry of Home Affairs (MHA) / Disaster Management Division",
+      "category": "Disaster Damage & Loss",
+      "nature": "National annual disaster loss aggregates",
+      "records_count": 12,
+      "columns_count": 5,
+      "columns": [
+        "Year",
+        "Lives Lost (in Nos.)",
+        "Cattle Lost (in Nos.)",
+        "House damaged (in Nos.)",
+        "Cropped areas affected (in lakh ha)"
+      ],
+      "temporal_coverage": {
+        "earliest_year": "2001-02",
+        "latest_year": "2012-13"
+      },
+      "direct_ingestion_ready": true
+    },
+    {
+      "id": "census_2011_pca_villages",
+      "filename": "2011-IndiaStateDistSbDistVill-0000.xlsx",
+      "filepath": "database/2011-IndiaStateDistSbDistVill-0000.xlsx",
+      "file_type": "Microsoft Excel 2007+ (OpenXML ZIP/XML)",
+      "file_size_bytes": 333801174,
+      "file_size_mb": 318.34,
+      "source": "Office of the Registrar General & Census Commissioner, India (Census 2011)",
+      "category": "Demographics / Population",
+      "nature": "Complete Primary Census Abstract (PCA) down to Village Level",
+      "records_count": 660942,
+      "village_records_count": 640949,
+      "unique_districts_count": 641,
+      "unique_subdistricts_count": 5989,
+      "sheets": [
+        "Data",
+        "Record Structure"
+      ],
+      "columns_count": 94,
+      "key_identifiers": [
+        "State",
+        "District",
+        "Subdistt",
+        "Town/Village",
+        "Level",
+        "Name",
+        "TRU"
+      ],
+      "demographic_fields": [
+        "No_HH",
+        "TOT_P",
+        "TOT_M",
+        "TOT_F",
+        "P_06",
+        "P_SC",
+        "P_ST",
+        "P_LIT",
+        "P_ILL",
+        "TOT_WORK_P",
+        "MAINWORK_P",
+        "MARGWORK_P",
+        "NON_WORK_P"
+      ],
+      "geometry_present": false,
+      "coordinates_present": false,
+      "direct_ingestion_ready": true,
+      "ingestion_prerequisite": "Stream-based XML ingestion required due to 2.1 GB uncompressed XML size"
+    },
+    {
+      "id": "census_2011_table_a1_aggregates",
+      "filename": "A-1_NO_OF_VILLAGES_TOWNS_HOUSEHOLDS_POPULATION_AND_AREA.xlsx",
+      "filepath": "database/A-1_NO_OF_VILLAGES_TOWNS_HOUSEHOLDS_POPULATION_AND_AREA.xlsx",
+      "file_type": "Microsoft Excel 2007+ (OpenXML)",
+      "file_size_bytes": 2235660,
+      "file_size_mb": 2.13,
+      "source": "Office of the Registrar General & Census Commissioner, India (Census 2011)",
+      "category": "Administrative / Area Aggregates",
+      "nature": "Table A-1 Area and Inhabited/Uninhabited Village count by Administrative Unit",
+      "records_count": 20024,
+      "columns_count": 15,
+      "columns": [
+        "State Code",
+        "District Code",
+        "Sub District Code",
+        "Level",
+        "Name",
+        "TRU",
+        "Inhabited Villages",
+        "Uninhabited Villages",
+        "Number of towns",
+        "Number of households",
+        "Population Persons",
+        "Population Males",
+        "Population Females",
+        "Area (In sq. km)",
+        "Population per sq. km."
+      ],
+      "geometry_present": false,
+      "direct_ingestion_ready": true
+    },
+    {
+      "id": "osm_northern_zone_roads",
+      "filename": "northern-zone-260903.osm.pbf",
+      "filepath": "database/northern-zone-260903.osm.pbf",
+      "file_type": "OpenStreetMap Protocolbuffer Binary Format (PBF v0.6)",
+      "file_size_bytes": 222865777,
+      "file_size_mb": 212.54,
+      "source": "OpenStreetMap (Geofabrik / Overpass Northern India Extract)",
+      "category": "Roads & Transportation Network",
+      "nature": "Geospatial vector road network and topology",
+      "total_dense_nodes": 33340998,
+      "total_ways": 3078603,
+      "total_road_ways": 1892602,
+      "total_relations": 15734,
+      "crs": "EPSG:4326 (WGS 84)",
+      "bounding_box": {
+        "min_longitude": 69.169911,
+        "min_latitude": 23.046881,
+        "max_longitude": 80.167546,
+        "max_latitude": 36.137884
+      },
+      "top_highway_types": {
+        "residential": 1131534,
+        "service": 253351,
+        "unclassified": 163580,
+        "track": 153264,
+        "tertiary": 60808,
+        "trunk": 22380,
+        "living_street": 20762,
+        "footway": 19327,
+        "secondary": 15920,
+        "path": 14849,
+        "primary": 12465,
+        "motorway": 6631
+      },
+      "networkx_graph_compatible": true,
+      "direct_ingestion_ready": true
+    }
+  ]
+}

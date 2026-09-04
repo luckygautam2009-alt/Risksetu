@@ -1,0 +1,106 @@
+/* Map Empty State — Floating Prompt Chip */
+.map-empty-state {
+  position: absolute;
+  bottom: calc(var(--layer-dock-height) + var(--space-xl) + var(--space-md));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  pointer-events: auto;
+  animation: emptyState-enter 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 200ms;
+}
+
+@keyframes emptyState-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.map-empty-state__card {
+  background: var(--color-bg-floating);
+  backdrop-filter: var(--backdrop-blur-dock);
+  -webkit-backdrop-filter: var(--backdrop-blur-dock);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-floating);
+  padding: var(--space-xs) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  max-width: 460px;
+}
+
+.map-empty-state__icon {
+  width: 22px;
+  height: 22px;
+  color: var(--color-geo-blue);
+  opacity: 0.5;
+}
+
+.map-empty-state__text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.map-empty-state__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  justify-content: center;
+  padding-top: var(--space-2xs);
+}
+
+.map-empty-state__pill {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.map-empty-state__pill:hover {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-subtle);
+}
+
+.map-empty-state__pill--critical {
+  color: var(--color-risk-critical);
+  border-color: var(--color-risk-critical-border);
+  background-color: var(--color-risk-critical-bg);
+}
+
+.map-empty-state__pill--critical:hover {
+  background-color: rgba(142, 28, 46, 0.16);
+}
+
+.map-empty-state__pill--high {
+  color: var(--color-risk-high);
+  border-color: var(--color-risk-high-border);
+  background-color: var(--color-risk-high-bg);
+}
+
+.map-empty-state__pill--high:hover {
+  background-color: rgba(194, 77, 44, 0.16);
+}
+
+@media (max-width: 520px) {
+  .map-empty-state__card {
+    max-width: calc(100vw - var(--space-lg) * 2);
+    padding: var(--space-sm) var(--space-md);
+  }
+}
