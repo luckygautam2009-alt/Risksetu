@@ -1,0 +1,34 @@
+/* Optional local browser smoke test. PLAYWRIGHT_MODULE can point to an installed runtime. */
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||'chrome'});
+ const page=await browser.newPage({viewport:{width:1440,height:1050}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ page.on('requestfailed',r=>{if(r.url().includes('tile.openstreetmap'))console.log('Basemap request:',r.failure()?.errorText)});
+ await page.goto('http://127.0.0.1:5173');
+ await page.getByText('DEMO ENVIRONMENT',{exact:true}).waitFor();
+ await page.getByText('73.2',{exact:false}).first().waitFor();
+ await page.getByRole('button',{name:'Sign in',exact:true}).click();
+ await page.getByRole('button',{name:'Officer',exact:true}).click();
+ await page.getByRole('button',{name:'Operations',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Operations',exact:true}).click();
+ await page.getByRole('heading',{name:'A clear view. A faster response.'}).waitFor();
+ await page.getByRole('button',{name:'Population at risk',exact:true}).click();
+ await page.getByRole('columnheader',{name:'Estimated people'}).waitFor();
+ await page.getByRole('button',{name:'Lower-risk routes',exact:true}).click();
+ await page.getByRole('button',{name:'Compare routes',exact:true}).click();
+ await page.getByText('Alternative A',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Overview',exact:true}).click();
+ await page.waitForFunction(()=>[...document.querySelectorAll('.leaflet-tile')].some(i=>i.naturalWidth>0),{},{timeout:12000}).catch(()=>console.log('Basemap tiles unavailable in this browser environment.'));
+ await page.screenshot({path:'../docs/risksetu-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ await page.getByRole('button',{name:'Open navigation',exact:true}).click();
+ await page.getByRole('button',{name:'Incident reports',exact:true}).click();
+ await page.getByRole('heading',{name:'Every report matters.'}).waitFor();
+ await page.waitForFunction(()=>document.querySelector('.sidebar').getBoundingClientRect().right<=1);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile page overflows horizontally');
+ await page.screenshot({path:'../docs/risksetu-mobile.png',fullPage:true});
+ assert.deepEqual(errors,[]);
+ await browser.close();console.log('Browser smoke passed: login, officer navigation, population table, routes, mobile navigation; no runtime errors.');
+})().catch(e=>{console.error(e);process.exit(1)});

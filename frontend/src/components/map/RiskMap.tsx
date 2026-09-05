@@ -7,12 +7,14 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&ur
 // Provide self-contained worker chunk to MapLibre in Vite
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 import { useMapContext } from '../../context/MapContext';
-import { hazardsToGeoJSON, MOCK_ROAD_NETWORK } from '../../data/mockRiskData';
+import { hazardsToGeoJSON } from '../../data/mockRiskData';
 import { groundObservationsToGeoJSON } from '../../data/groundIntelligence';
 import { alertsToGeoJSON } from '../../data/alertsData';
 import { areHazardsVisible, isLayerActive } from '../../data/layers';
 import { MAP_CONFIG, MAP_LAYER_IDS, MAP_SOURCE_IDS } from '../../data/mapConfig';
 import { formatCoordinate } from '../../utils/riskStyles';
+import type { LandslideItem, RoadEdgeItem, SosListItem } from '../../services/api';
+import type { FeatureCollection, Point } from 'geojson';
 import './RiskMap.css';
 
 const HAZARD_LAYER_IDS = [
@@ -47,11 +49,90 @@ const ALERT_LAYER_IDS = [
   MAP_LAYER_IDS.alertsLabel,
 ];
 
+const LANDSLIDE_LAYER_IDS = [
+  MAP_LAYER_IDS.landslidesClusters,
+  MAP_LAYER_IDS.landslidesClusterCount,
+  MAP_LAYER_IDS.landslidesUnclustered,
+  MAP_LAYER_IDS.landslidesLabel,
+];
+
+const SOS_LAYER_IDS = [
+  MAP_LAYER_IDS.sosPulse,
+  MAP_LAYER_IDS.sos,
+  MAP_LAYER_IDS.sosLabel,
+];
+
+const LIVE_RISK_LAYER_IDS = [
+  MAP_LAYER_IDS.liveRiskMarkerPulse,
+  MAP_LAYER_IDS.liveRiskMarker,
+];
+
+// ── GeoJSON converters for real backend data ─────────────────────────────
+function landslidesToGeoJSON(items: LandslideItem[]): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: items.map((l) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [l.longitude, l.latitude] },
+      properties: {
+        id: l.id,
+        gsi_slide_no: l.gsi_slide_no,
+        slide_name: l.slide_name || l.location_description || `GSI #${l.gsi_slide_no}`,
+        state: l.state,
+        district: l.district,
+        movement_type: l.movement_type || 'Mass Movement',
+        material: l.material || 'Debris',
+        event_date: l.event_date,
+      },
+    })),
+  };
+}
+
+function viewportRoadsToGeoJSON(items: RoadEdgeItem[]): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: items.map((r) => ({
+      type: 'Feature' as const,
+      id: r.id,
+      geometry: {
+        type: 'LineString' as const,
+        coordinates: r.coordinates,
+      },
+      properties: {
+        id: r.id,
+        name: r.name || `Way ${r.osm_way_id}`,
+        highwayClass: r.highway_class,
+        status: 'open',
+        bridge: r.bridge,
+        tunnel: r.tunnel,
+        length_m: r.length_m,
+      },
+    })),
+  };
+}
+
+function sosListToGeoJSON(items: SosListItem[]): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: items.map((s) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [s.longitude, s.latitude] },
+      properties: {
+        id: s.id,
+        severity: s.severity,
+        status: s.status,
+        risk_level: s.risk_level,
+        created_at: s.created_at,
+      },
+    })),
+  };
+}
+
 function setupMapLayers(map: maplibregl.Map) {
-  // 1. Add Road Network Source & Layers
+  // 1. Add Road Network Source & Layers — starts empty, filled by viewport loading
   map.addSource(MAP_SOURCE_IDS.roads, {
     type: 'geojson',
-    data: MOCK_ROAD_NETWORK,
+    data: { type: 'FeatureCollection', features: [] },
   });
 
   // Road casing for crisp cartographic separation
@@ -450,8 +531,7 @@ function setupMapLayers(map: maplibregl.Map) {
   });
 
   // 5. Spatial Alerts Source & Layers
-  map.addSource(MAP_SOURCE_IDS.alerts, {
-    type: 'geojson',
+  map.addSource(MAP_SOURCE_IDS.alerts, {    type: 'geojson',
     data: { type: 'FeatureCollection', features: [] },
   });
 
@@ -510,6 +590,175 @@ function setupMapLayers(map: maplibregl.Map) {
       'text-halo-width': 1.8,
     },
   });
+
+  // 6. SOS markers source & layers — populated from real SOS backend records
+  map.addSource(MAP_SOURCE_IDS.sos, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] },
+  });
+
+  map.addLayer({
+    id: MAP_LAYER_IDS.sosPulse,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.sos,
+    paint: {
+      'circle-radius': 24,
+      'circle-color': '#c24d2c',
+      'circle-opacity': 0.18,
+      'circle-blur': 0.5,
+    },
+  });
+
+  map.addLayer({
+    id: MAP_LAYER_IDS.sos,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.sos,
+    paint: {
+      'circle-radius': 9,
+      'circle-color': '#c24d2c',
+      'circle-stroke-width': 2.5,
+      'circle-stroke-color': '#ffffff',
+      'circle-opacity': 0.95,
+    },
+  });
+
+  map.addLayer({
+    id: MAP_LAYER_IDS.sosLabel,
+    type: 'symbol',
+    source: MAP_SOURCE_IDS.sos,
+    minzoom: 6,
+    layout: {
+      'text-field': ['concat', 'SOS · ', ['get', 'severity']],
+      'text-size': 9.5,
+      'text-font': ['Open Sans Semibold'],
+      'text-offset': [0, 1.4],
+      'text-anchor': 'top',
+    },
+    paint: {
+      'text-color': '#a63d22',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 1.8,
+    },
+  });
+
+  // 7. GSI Historical Landslide Source — clustered for 31,417+ records
+  map.addSource(MAP_SOURCE_IDS.landslides, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] },
+    cluster: true,
+    clusterMaxZoom: 12,
+    clusterRadius: 50,
+  });
+
+  // Cluster circles (aggregated)
+  map.addLayer({
+    id: MAP_LAYER_IDS.landslidesClusters,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.landslides,
+    filter: ['has', 'point_count'],
+    paint: {
+      'circle-color': [
+        'step',
+        ['get', 'point_count'],
+        '#6b8e5e',   // <10
+        10, '#b0821e', // 10-50
+        50, '#c24d2c', // 50+
+      ],
+      'circle-radius': [
+        'step',
+        ['get', 'point_count'],
+        15,
+        10, 20,
+        50, 28,
+      ],
+      'circle-opacity': 0.85,
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#ffffff',
+    },
+  });
+
+  // Cluster count labels
+  map.addLayer({
+    id: MAP_LAYER_IDS.landslidesClusterCount,
+    type: 'symbol',
+    source: MAP_SOURCE_IDS.landslides,
+    filter: ['has', 'point_count'],
+    layout: {
+      'text-field': '{point_count_abbreviated}',
+      'text-size': 10,
+      'text-font': ['Open Sans Semibold'],
+    },
+    paint: {
+      'text-color': '#ffffff',
+    },
+  });
+
+  // Individual unclustered landslide points
+  map.addLayer({
+    id: MAP_LAYER_IDS.landslidesUnclustered,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.landslides,
+    filter: ['!', ['has', 'point_count']],
+    paint: {
+      'circle-radius': 6,
+      'circle-color': '#6b8e5e',
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': '#ffffff',
+      'circle-opacity': 0.9,
+    },
+  });
+
+  // Landslide name labels (zoom > 9)
+  map.addLayer({
+    id: MAP_LAYER_IDS.landslidesLabel,
+    type: 'symbol',
+    source: MAP_SOURCE_IDS.landslides,
+    filter: ['!', ['has', 'point_count']],
+    minzoom: 9,
+    layout: {
+      'text-field': ['get', 'slide_name'],
+      'text-size': 8.5,
+      'text-font': ['Open Sans Regular'],
+      'text-offset': [0, 1.2],
+      'text-anchor': 'top',
+    },
+    paint: {
+      'text-color': '#4a6741',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 1.5,
+    },
+  });
+
+  // 8. Live Risk Evaluation Marker — shows selected eval coords
+  map.addSource(MAP_SOURCE_IDS.liveRiskPoint, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] },
+  });
+
+  map.addLayer({
+    id: MAP_LAYER_IDS.liveRiskMarkerPulse,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.liveRiskPoint,
+    paint: {
+      'circle-radius': 20,
+      'circle-color': '#0284c7',
+      'circle-opacity': 0.2,
+      'circle-blur': 0.5,
+    },
+  });
+
+  map.addLayer({
+    id: MAP_LAYER_IDS.liveRiskMarker,
+    type: 'circle',
+    source: MAP_SOURCE_IDS.liveRiskPoint,
+    paint: {
+      'circle-radius': 7,
+      'circle-color': '#0284c7',
+      'circle-stroke-width': 3,
+      'circle-stroke-color': '#ffffff',
+      'circle-opacity': 0.95,
+    },
+  });
 }
 
 export function RiskMap() {
@@ -539,18 +788,37 @@ export function RiskMap() {
     selectedAlertId,
     selectedAlert,
     selectAlert,
+    sosState,
+    evalCoords,
+    // Phase 2 — Dynamic viewport data
+    landslides,
+    selectLandslide,
+    viewportRoads,
+    updateViewport,
+    hasDataInViewport,
+    sosList,
+    selectSos,
+    selectLocation,
   } = useMapContext();
 
   const selectHazardRef = useRef(selectHazard);
   const selectRoadRef = useRef(selectRoad);
   const selectObservationRef = useRef(selectObservation);
   const selectAlertRef = useRef(selectAlert);
+  const selectLandslideRef = useRef(selectLandslide);
+  const selectSosRef = useRef(selectSos);
+  const selectLocationRef = useRef(selectLocation);
+  const updateViewportRef = useRef(updateViewport);
   useEffect(() => {
     selectHazardRef.current = selectHazard;
     selectRoadRef.current = selectRoad;
     selectObservationRef.current = selectObservation;
     selectAlertRef.current = selectAlert;
-  }, [selectHazard, selectRoad, selectObservation, selectAlert]);
+    selectLandslideRef.current = selectLandslide;
+    selectSosRef.current = selectSos;
+    selectLocationRef.current = selectLocation;
+    updateViewportRef.current = updateViewport;
+  }, [selectHazard, selectRoad, selectObservation, selectAlert, selectLandslide, selectSos, selectLocation, updateViewport]);
 
   // Auto-resize observer when container dimensions change
   useEffect(() => {
@@ -638,51 +906,97 @@ export function RiskMap() {
         selectAlertRef.current(feature.properties.id as string);
       });
 
+      // Click unclustered landslide
+      map.on('click', MAP_LAYER_IDS.landslidesUnclustered, (e: MapLayerMouseEvent) => {
+        const feature = e.features?.[0];
+        if (!feature?.properties?.id) return;
+        selectLandslideRef.current(feature.properties.id as string);
+      });
+
+      // Click cluster to zoom in
+      map.on('click', MAP_LAYER_IDS.landslidesClusters, (e: MapLayerMouseEvent) => {
+        const feature = e.features?.[0];
+        if (!feature) return;
+        const source = map.getSource(MAP_SOURCE_IDS.landslides) as maplibregl.GeoJSONSource;
+        source.getClusterExpansionZoom(feature.properties?.cluster_id as number).then((zoom) => {
+          const geom = feature.geometry as Point;
+          map.easeTo({
+            center: geom.coordinates as [number, number],
+            zoom,
+          });
+        });
+      });
+
+      // Click SOS marker
+      map.on('click', MAP_LAYER_IDS.sos, (e: MapLayerMouseEvent) => {
+        const feature = e.features?.[0];
+        if (!feature?.properties?.id) return;
+        selectSosRef.current(feature.properties.id as string);
+      });
+
       // Hover cursors
-      map.on('mouseenter', MAP_LAYER_IDS.hazards, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', MAP_LAYER_IDS.hazards, () => {
-        map.getCanvas().style.cursor = '';
-      });
+      const hoverLayers = [
+        MAP_LAYER_IDS.hazards,
+        MAP_LAYER_IDS.roads,
+        MAP_LAYER_IDS.groundIntel,
+        MAP_LAYER_IDS.alerts,
+        MAP_LAYER_IDS.landslidesUnclustered,
+        MAP_LAYER_IDS.landslidesClusters,
+        MAP_LAYER_IDS.sos,
+      ];
+      for (const layerId of hoverLayers) {
+        map.on('mouseenter', layerId, () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', layerId, () => {
+          map.getCanvas().style.cursor = '';
+        });
+      }
 
-      map.on('mouseenter', MAP_LAYER_IDS.roads, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', MAP_LAYER_IDS.roads, () => {
-        map.getCanvas().style.cursor = '';
-      });
-
-      map.on('mouseenter', MAP_LAYER_IDS.groundIntel, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', MAP_LAYER_IDS.groundIntel, () => {
-        map.getCanvas().style.cursor = '';
-      });
-
-      map.on('mouseenter', MAP_LAYER_IDS.alerts, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', MAP_LAYER_IDS.alerts, () => {
-        map.getCanvas().style.cursor = '';
-      });
-
-      // Click on background deselects if not clicked on any layer
+      // Click on background — selects location for live risk evaluation
       map.on('click', (e: MapMouseEvent) => {
+        const interactiveLayers = [
+          MAP_LAYER_IDS.hazards,
+          MAP_LAYER_IDS.roads,
+          MAP_LAYER_IDS.groundIntel,
+          MAP_LAYER_IDS.alerts,
+          MAP_LAYER_IDS.landslidesUnclustered,
+          MAP_LAYER_IDS.landslidesClusters,
+          MAP_LAYER_IDS.sos,
+        ];
         const features = map.queryRenderedFeatures(e.point, {
-          layers: [
-            MAP_LAYER_IDS.hazards,
-            MAP_LAYER_IDS.roads,
-            MAP_LAYER_IDS.groundIntel,
-            MAP_LAYER_IDS.alerts,
-          ],
+          layers: interactiveLayers,
         });
         if (features.length === 0) {
-          selectHazardRef.current(null);
-          selectObservationRef.current(null);
-          selectAlertRef.current(null);
+          // Click on empty map — evaluate this coordinate
+          selectLocationRef.current({
+            latitude: e.lngLat.lat,
+            longitude: e.lngLat.lng,
+            name: `${e.lngLat.lat.toFixed(4)}°N, ${e.lngLat.lng.toFixed(4)}°E`,
+            source: 'map-click',
+          });
         }
       });
+
+      // Viewport-based data loading — fires on map movement
+      map.on('moveend', () => {
+        const bounds = map.getBounds();
+        updateViewportRef.current([
+          bounds.getWest(),
+          bounds.getSouth(),
+          bounds.getEast(),
+          bounds.getNorth(),
+        ]);
+      });
+
+      // Trigger initial viewport load
+      const initBounds = map.getBounds();
+      updateViewportRef.current([
+        initBounds.getWest(),
+        initBounds.getSouth(),
+        initBounds.getEast(),
+        initBounds.getNorth(),
+      ]);
 
       // Telemetry coordinates tracking
       map.on('mousemove', (e: MapMouseEvent) => {
@@ -721,6 +1035,14 @@ export function RiskMap() {
           const alertOpacity = 0.22 + Math.sin(t * 3.0) * 0.12;
           mapRef.current.setPaintProperty(MAP_LAYER_IDS.alertsPulse, 'circle-radius', alertRadius);
           mapRef.current.setPaintProperty(MAP_LAYER_IDS.alertsPulse, 'circle-opacity', alertOpacity);
+        }
+
+        // SOS pulse
+        if (mapRef.current.getLayer(MAP_LAYER_IDS.sosPulse)) {
+          const sosRadius = 22 + Math.sin(t * 2.5) * 6;
+          const sosOpacity = 0.18 + Math.sin(t * 2.5) * 0.10;
+          mapRef.current.setPaintProperty(MAP_LAYER_IDS.sosPulse, 'circle-radius', sosRadius);
+          mapRef.current.setPaintProperty(MAP_LAYER_IDS.sosPulse, 'circle-opacity', sosOpacity);
         }
       }
       pulseRef.current = requestAnimationFrame(animatePulse);
@@ -826,20 +1148,16 @@ export function RiskMap() {
     }
   }, [simulationPhase, selectedRoadId, simulationResult]);
 
-  // Smooth flyTo on road selection
+  // Smooth flyTo on road selection (uses viewport roads from PostGIS)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedRoadId) return;
 
-    const roadFeature = MOCK_ROAD_NETWORK.features.find((f) => f.id === selectedRoadId);
-    if (!roadFeature || roadFeature.geometry.type !== 'LineString') return;
+    const road = viewportRoads.find((r) => r.id === selectedRoadId);
+    if (!road || !road.coordinates || road.coordinates.length === 0) return;
 
-    const coords = roadFeature.geometry.coordinates as [number, number][];
-    if (coords.length === 0) return;
-
-    // Calculate center of the corridor
-    const midIdx = Math.floor(coords.length / 2);
-    const center = coords[midIdx];
+    const midIdx = Math.floor(road.coordinates.length / 2);
+    const center = road.coordinates[midIdx];
 
     map.flyTo({
       center,
@@ -847,7 +1165,7 @@ export function RiskMap() {
       duration: 1000,
       essential: true,
     });
-  }, [selectedRoadId]);
+  }, [selectedRoadId, viewportRoads]);
 
   // Smooth flyTo on hazard selection
   useEffect(() => {
@@ -910,6 +1228,115 @@ export function RiskMap() {
     source.setData(alertsToGeoJSON(alerts, selectedAlertId));
   }, [alerts, selectedAlertId]);
 
+  // Sync SOS source with real SOS list from backend
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource(MAP_SOURCE_IDS.sos) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    // Real SOS records from backend + locally submitted SOS
+    const baseSosGeo = sosListToGeoJSON(sosList);
+    if (sosState.step === 'done' && evalCoords) {
+      baseSosGeo.features.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [evalCoords.lon, evalCoords.lat] },
+        properties: {
+          id: sosState.sosId ?? 'sos-active',
+          severity: 'ACTIVE',
+          status: 'ACTIVE',
+          risk_level: sosState.riskLevel ?? '',
+          created_at: new Date().toISOString(),
+        },
+      });
+    }
+    source.setData(baseSosGeo);
+  }, [sosList, sosState, evalCoords]);
+
+  // Sync SOS layer visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const visible = isLayerActive(layers, 'sos') ? 'visible' : 'none';
+    for (const layerId of SOS_LAYER_IDS) {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', visible);
+      }
+    }
+  }, [layers]);
+
+  // Sync GSI Historical Landslides data
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource(MAP_SOURCE_IDS.landslides) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    source.setData(landslidesToGeoJSON(landslides));
+  }, [landslides]);
+
+  // Sync Landslide layer visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const visible = isLayerActive(layers, 'landslides') ? 'visible' : 'none';
+    for (const layerId of LANDSLIDE_LAYER_IDS) {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', visible);
+      }
+    }
+  }, [layers]);
+
+  // Sync Viewport Roads data from PostGIS
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource(MAP_SOURCE_IDS.roads) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    source.setData(viewportRoadsToGeoJSON(viewportRoads));
+  }, [viewportRoads]);
+
+  // Sync Live Risk evaluation marker
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource(MAP_SOURCE_IDS.liveRiskPoint) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    if (evalCoords) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [evalCoords.lon, evalCoords.lat] },
+          properties: { id: 'eval-point' },
+        }],
+      });
+    } else {
+      source.setData({ type: 'FeatureCollection', features: [] });
+    }
+  }, [evalCoords]);
+
+  // Sync Live Risk layer visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const visible = isLayerActive(layers, 'risk') ? 'visible' : 'none';
+    for (const layerId of LIVE_RISK_LAYER_IDS) {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', visible);
+      }
+    }
+  }, [layers]);
+
   // Smooth flyTo on observation selection
   useEffect(() => {
     const map = mapRef.current;
@@ -949,6 +1376,12 @@ export function RiskMap() {
         <div className="risk-map__loading-indicator">
           <div className="risk-map__loading-spinner" />
           <span>CONNECTING TO OPENSTREETMAP BASEMAP...</span>
+        </div>
+      )}
+      {isMapLoaded && !hasDataInViewport && (
+        <div className="risk-map__no-data-notice" role="status">
+          <span className="risk-map__no-data-icon">⊘</span>
+          NO VERIFIED DATA IN THIS AREA
         </div>
       )}
       <div ref={coordsRef} className="risk-map__coords font-mono" aria-live="polite">

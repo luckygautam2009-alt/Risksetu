@@ -1,0 +1,84 @@
+{
+  "version": "risksetu-landslide-susceptibility-v2",
+  "artifact_label": "EXPERIMENTAL \u2014 NOT PRODUCTION READY",
+  "feature_count": 7,
+  "geo_features_included": false,
+  "geo_bias_note": "lat/lon excluded from model \u2014 rainfall-only feature set selected.",
+  "features": [
+    {
+      "name": "annual_rainfall_mean_mm",
+      "dtype": "float64",
+      "importance": 0.211223
+    },
+    {
+      "name": "monsoon_rainfall_mean_mm",
+      "dtype": "float64",
+      "importance": 0.19554
+    },
+    {
+      "name": "winter_rainfall_mean_mm",
+      "dtype": "float64",
+      "importance": 0.219513
+    },
+    {
+      "name": "pre_monsoon_rainfall_mean_mm",
+      "dtype": "float64",
+      "importance": 0.055855
+    },
+    {
+      "name": "post_monsoon_rainfall_mean_mm",
+      "dtype": "float64",
+      "importance": 0.041842
+    },
+    {
+      "name": "monsoon_variability_mm",
+      "dtype": "float64",
+      "importance": 0.158142
+    },
+    {
+      "name": "rainfall_seasonality_ratio",
+      "dtype": "float64",
+      "importance": 0.117884
+    }
+  ],
+  "excluded_features": [
+    {
+      "name": "latitude",
+      "reason": "GEOGRAPHIC PRIOR: In the ablation experiment lat/lon combined importance was \u22650.25 ROC-AUC drop when removed, indicating geographic memorization. Rainfall-only model selected to ensure predictions reflect physical susceptibility rather than GSI survey coverage patterns."
+    },
+    {
+      "name": "longitude",
+      "reason": "GEOGRAPHIC PRIOR: Same as latitude. See ablation analysis."
+    },
+    {
+      "name": "distance_to_nearest_slide_km",
+      "reason": "TARGET LEAKAGE: Positive points have distance=0 to themselves in the GSI inventory; negatives have distance\u2265exclusion_km by construction. The model would learn to discriminate proximity-to-label-source rather than environmental susceptibility."
+    },
+    {
+      "name": "slide_count_within_5km",
+      "reason": "TARGET LEAKAGE: Positive points are GSI inventory members and thus always have high local density. Negatives are excluded by buffer. The feature trivially separates labels."
+    },
+    {
+      "name": "slide_count_within_10km",
+      "reason": "TARGET LEAKAGE: Same spatial autocorrelation leakage as 5km density."
+    },
+    {
+      "name": "slide_count_within_25km",
+      "reason": "TARGET LEAKAGE: Same spatial autocorrelation leakage as 5km/10km density."
+    },
+    {
+      "name": "elevation_m",
+      "reason": "DATA UNAVAILABLE: No DEM raster present in project. Will be added in future phase after real DEM ingestion."
+    },
+    {
+      "name": "slope_degrees",
+      "reason": "DATA UNAVAILABLE: Requires DEM. Not fabricated."
+    },
+    {
+      "name": "aspect_degrees",
+      "reason": "DATA UNAVAILABLE: Requires DEM. Not fabricated."
+    }
+  ],
+  "terrain_features_available": false,
+  "dynamic_weather_features_available": false
+}

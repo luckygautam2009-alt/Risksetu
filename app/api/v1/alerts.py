@@ -3,14 +3,16 @@ Operational Alert Generation & Explainable Decision Support API endpoints.
 """
 from __future__ import annotations
 
+import json
 import uuid
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.orm import Session
 import structlog
 
 from app.core.errors import NotFoundError
 from app.core.rate_limit import check_rate_limit
+from app.core.security import decode_token
 from app.db.session import get_db
 from app.models.alert import Alert
 from app.models.user import User
@@ -30,6 +32,7 @@ from app.services.alerts.engine import (
     list_alerts,
 )
 from app.services.alerts.lifecycle import transition_alert_status
+from app.services.alerts.realtime import realtime_manager
 from app.services.auth.dependencies import get_current_user, require_role
 
 logger = structlog.get_logger("risksetu.alerts_api")
@@ -274,3 +277,53 @@ async def dismiss_alert(
         data=_to_alert_data(alert),
         meta={"request_id": rid, "action": "DISMISSED"},
     )
+
+
+# ---------------------------------------------------------------------------
+# WebSocket /alerts/ws — Real-time Emergency Broadcast Stream
+# ---------------------------------------------------------------------------
+
+@router.websocket("/ws")
+async def alerts_websocket_endpoint(
+    websocket: WebSocket,
+    token: str | None = Query(None),
+) -> None:
+    """Authenticated real-time WebSocket stream for emergency alerts and SOS events.
+
+    Clients must pass JWT token via query parameter (?token=...).
+    Maintains heartbeat and delivers events upon authoritative backend DB commit.
+    """
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    try:
+        payload = decode_token(token)
+        user_id_str = payload.get("sub")
+        role = payload.get("role", "citizen")
+        if not user_id_str:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+        user_uuid = uuid.UUID(user_id_str)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("websocket_auth_failed", error=str(exc))
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    await realtime_manager.connect(websocket, user_id=user_uuid, role=role)
+
+    try:
+        while True:
+            raw_msg = await websocket.receive_text()
+            # Handle heartbeat ping/pong
+            try:
+                msg_data = json.loads(raw_msg)
+                if isinstance(msg_data, dict) and msg_data.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except Exception:  # noqa: BLE001
+                pass
+    except WebSocketDisconnect:
+        realtime_manager.disconnect(websocket)
+    except Exception as exc:  # noqa: BLE001
+        logger.info("websocket_connection_closed", error=str(exc))
+        realtime_manager.disconnect(websocket)

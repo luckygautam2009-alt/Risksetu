@@ -13,12 +13,15 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 import structlog
 
-from app.core.errors import NotFoundError
+from app.core.errors import IdentityVerificationRequiredError, NotFoundError
 from app.core.rate_limit import check_rate_limit
 from app.core.redis import get_redis_client
 from app.db.session import get_db
+from app.models.evidence import IncidentEvidence
 from app.models.ground_report import GroundReport, GroundReportAudit
 from app.models.user import User
+from app.services.identity.service import IdentityService
+
 from app.schemas.ground_report import (
     GroundReportCreateRequest,
     GroundReportData,
@@ -50,6 +53,7 @@ from app.services.ground_intelligence.explanation import GroundIntelligenceExpla
 from app.services.ground_intelligence.trust import TrustScoreResult
 
 logger = structlog.get_logger("risksetu.ground_reports_api")
+_identity_service = IdentityService()
 
 router = APIRouter(prefix="/ground-reports", tags=["ground-reports"])
 
@@ -177,7 +181,14 @@ async def create_ground_report(
                 replay_meta = {"request_id": rid, "idempotency_key": idempotency_key, "idempotent_replay": True}
                 return GroundReportResponse(data=_to_report_data(db_cached), meta=replay_meta)
 
-    # 3. Process report via Ground Intelligence Coordinator
+    # 3. Enforce Verified Identity if photographic evidence is attached
+    if request_body.evidence_id:
+        if not _identity_service.is_user_verified(db=db, user_id=current_user.id):
+            raise IdentityVerificationRequiredError(
+                "Identity verification is required before submitting photographic emergency evidence."
+            )
+
+    # 4. Process report via Ground Intelligence Coordinator
     engine = GroundIntelligenceEngine(db=db)
     report_data = engine.submit_report(
         request=request_body,
@@ -186,7 +197,14 @@ async def create_ground_report(
         idempotency_key=idempotency_key,
     )
 
-    # 4. Cache idempotency key in Redis (24-hour TTL) — best-effort
+    # 5. Link evidence to report
+    if request_body.evidence_id:
+        evidence = db.get(IncidentEvidence, request_body.evidence_id)
+        if evidence and evidence.owner_user_id == current_user.id:
+            evidence.incident_id = uuid.UUID(report_data.report_id)
+            db.commit()
+
+    # 6. Cache idempotency key in Redis (24-hour TTL) — best-effort
     if idempotency_redis_key:
         try:
             redis_client.setex(idempotency_redis_key, 86400, report_data.report_id)  # type: ignore[arg-type]

@@ -1,0 +1,21 @@
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+**/.venv*/
+**/__pycache__/
+**/.pytest_cache/
+**/node_modules/
+**/dist/
+*.sqlite3*
+backend/uploads/
+*.joblib
+*.log
+
+# Local/runtime junk
+backend/.venv/
+backend/.venv-risksetu/
+.vercel-validation-deps/
+.pytest_cache/
+**/__pycache__/
+frontend/dist/

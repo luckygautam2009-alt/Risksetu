@@ -1,12 +1,45 @@
+import { useState } from 'react';
 import { useMapContext } from '../../context/MapContext';
 import { Badge } from '../ui/Badge';
 import { IconButton } from '../ui/IconButton';
+import { moderateGroundReportStatus } from '../../services/api';
+import { t } from '../../utils/i18n';
 import './GroundObservationPanel.css';
 
 export function GroundObservationPanel() {
-  const { selectedObservation, selectObservation, selectHazard } = useMapContext();
+  const {
+    selectedObservation,
+    selectObservation,
+    selectHazard,
+    userRole,
+    language,
+  } = useMapContext();
+
+  const [communityVote, setCommunityVote] = useState<'confirmed' | 'denied' | 'unsure' | null>(null);
+  const [moderationState, setModerationState] = useState<{
+    status: 'idle' | 'loading' | 'success' | 'error';
+    newStatus?: string;
+    errorMsg?: string;
+  }>({ status: 'idle' });
 
   if (!selectedObservation) return null;
+
+  const handleCommunityVote = (type: 'confirmed' | 'denied' | 'unsure') => {
+    setCommunityVote(type);
+  };
+
+  const handleModeration = async (decision: 'ACCEPTED' | 'REJECTED' | 'REVIEW_REQUIRED') => {
+    setModerationState({ status: 'loading' });
+    try {
+      await moderateGroundReportStatus(selectedObservation.id, decision, `Moderated by ${userRole}`);
+      setModerationState({ status: 'success', newStatus: decision });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Moderation failed';
+      setModerationState({ status: 'error', errorMsg: msg });
+    }
+  };
+
+  const isOfficer = userRole === 'Incident Commander' || userRole === 'Disaster Response Lead';
 
   return (
     <div className="obs-panel" role="region" aria-label="Field Ground Observation Intelligence">
@@ -15,7 +48,7 @@ export function GroundObservationPanel() {
         <div className="obs-panel__header-meta">
           <div className="obs-panel__tag font-mono">
             <span className="obs-panel__tag-dot" aria-hidden="true" />
-            FIELD OBSERVATION
+            {selectedObservation.status === 'VERIFIED' ? 'OFFICIALLY VERIFIED REPORT' : 'COMMUNITY SIGNAL · TRIAGE'}
           </div>
           <h2 className="obs-panel__location font-mono">{selectedObservation.location.toUpperCase()}</h2>
         </div>
@@ -33,7 +66,7 @@ export function GroundObservationPanel() {
         />
       </div>
 
-      {/* ── CORE INTELLIGENCE METRICS (Exact Prompt Specifications) ── */}
+      {/* ── CORE INTELLIGENCE METRICS ── */}
       <div className="obs-panel__grid">
         {/* Trust Score */}
         <div className="obs-card">
@@ -66,11 +99,11 @@ export function GroundObservationPanel() {
           <span className="obs-card__val font-mono">
             {selectedObservation.corroboration}
           </span>
-          <span className="obs-card__sub">{selectedObservation.corroborationCount} Independent Reports</span>
+          <span className="obs-card__sub">{selectedObservation.corroborationCount} Reports</span>
         </div>
       </div>
 
-      {/* ── CRITICAL SYSTEM DISCLAIMER (Never call trust score probability of truth) ── */}
+      {/* ── CRITICAL SYSTEM DISCLAIMER ── */}
       <div className="obs-panel__disclaimer">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
@@ -98,9 +131,97 @@ export function GroundObservationPanel() {
 
           <div className="obs-panel__reporter-box font-mono">
             <span>SOURCE: {selectedObservation.reporterType.toUpperCase()}</span>
-            <span>STATUS: {selectedObservation.status}</span>
+            <span>STATUS: {moderationState.newStatus ?? selectedObservation.status}</span>
           </div>
         </div>
+
+        {/* ── COMMUNITY SIGNAL (500m PROXIMITY PEER VERIFICATION) ── */}
+        <div className="obs-panel__community-box">
+          <div className="obs-panel__community-header">
+            <span className="obs-panel__community-title font-mono">{t(language, 'communitySignal')} (500m)</span>
+            <span className="obs-panel__community-badge font-mono">NON-AUTHORITATIVE</span>
+          </div>
+          <p className="obs-panel__community-hint">
+            Are you currently within visual distance of this hazard location?
+          </p>
+          <div className="obs-panel__community-actions">
+            <button
+              type="button"
+              className={`obs-panel__comm-btn ${communityVote === 'confirmed' ? 'active confirm' : ''}`}
+              onClick={() => handleCommunityVote('confirmed')}
+            >
+              ✓ {t(language, 'confirmObservation')}
+            </button>
+            <button
+              type="button"
+              className={`obs-panel__comm-btn ${communityVote === 'denied' ? 'active deny' : ''}`}
+              onClick={() => handleCommunityVote('denied')}
+            >
+              ✗ {t(language, 'disputeObservation')}
+            </button>
+            <button
+              type="button"
+              className={`obs-panel__comm-btn ${communityVote === 'unsure' ? 'active unsure' : ''}`}
+              onClick={() => handleCommunityVote('unsure')}
+            >
+              ? {t(language, 'unsureObservation')}
+            </button>
+          </div>
+          {communityVote && (
+            <div className="obs-panel__community-feedback font-mono">
+              Signal recorded locally. Contributes to peer corroboration heuristic.
+            </div>
+          )}
+        </div>
+
+        {/* ── OFFICIAL OFFICER MODERATION ── */}
+        {isOfficer && (
+          <div className="obs-panel__moderation-box">
+            <div className="obs-panel__moderation-header">
+              <span className="obs-panel__moderation-title font-mono">OFFICER MODERATION DISPATCH</span>
+              <span className="obs-panel__moderation-role font-mono">{userRole.toUpperCase()}</span>
+            </div>
+            <div className="obs-panel__moderation-actions">
+              <button
+                type="button"
+                className="obs-panel__mod-btn obs-panel__mod-btn--verify font-mono"
+                disabled={moderationState.status === 'loading'}
+                onClick={() => handleModeration('ACCEPTED')}
+              >
+                VERIFY
+              </button>
+              <button
+                type="button"
+                className="obs-panel__mod-btn obs-panel__mod-btn--reject font-mono"
+                disabled={moderationState.status === 'loading'}
+                onClick={() => handleModeration('REJECTED')}
+              >
+                REJECT
+              </button>
+              <button
+                type="button"
+                className="obs-panel__mod-btn obs-panel__mod-btn--review font-mono"
+                disabled={moderationState.status === 'loading'}
+                onClick={() => handleModeration('REVIEW_REQUIRED')}
+              >
+                REVIEW REQ.
+              </button>
+            </div>
+            {moderationState.status === 'loading' && (
+              <div className="obs-panel__mod-status font-mono">Processing moderation update…</div>
+            )}
+            {moderationState.status === 'success' && (
+              <div className="obs-panel__mod-status obs-panel__mod-status--ok font-mono">
+                Status updated to {moderationState.newStatus}
+              </div>
+            )}
+            {moderationState.status === 'error' && (
+              <div className="obs-panel__mod-status obs-panel__mod-status--err font-mono">
+                {moderationState.errorMsg}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── ACTIONS ── */}

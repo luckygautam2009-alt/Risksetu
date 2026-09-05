@@ -1,0 +1,6 @@
+{
+  "name": "risksetu", "version": "1.0.0", "private": true, "type": "module",
+  "scripts": {"dev": "vite --host 127.0.0.1", "typecheck": "tsc --noEmit", "build": "tsc --noEmit && vite build", "preview": "vite preview --host 127.0.0.1"},
+  "dependencies": {"react": "^19.1.0", "react-dom": "^19.1.0", "leaflet": "^1.9.4", "react-leaflet": "^5.0.0", "@supabase/supabase-js": "^2.57.0", "lucide-react": "^0.468.0", "idb": "^8.0.0"},
+  "devDependencies": {"@vitejs/plugin-react": "^4.7.0", "vite": "^6.4.0", "typescript": "^5.9.2", "@types/react": "^19.1.0", "@types/react-dom": "^19.1.0", "@types/leaflet": "^1.9.20", "@tailwindcss/vite": "^4.1.0", "tailwindcss": "^4.1.0"}
+}

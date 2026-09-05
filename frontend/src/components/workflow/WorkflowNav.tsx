@@ -26,7 +26,7 @@ export function WorkflowNav() {
       id: 'alerts',
       stepNumber: '04',
       label: 'ALERTS',
-      badge: activeAlertsCount > 0 ? `${activeAlertsCount} CRITICAL` : undefined,
+      badge: activeAlertsCount > 0 ? `${activeAlertsCount} ACTIVE` : undefined,
     },
   ];
 

@@ -1,0 +1,17 @@
+.git
+**/.env
+**/.env.*
+**/.venv*/**
+**/node_modules/**
+**/dist/**
+**/__pycache__/**
+**/.pytest_cache/**
+**/*.sqlite3*
+backend/uploads/**
+**/*.log
+backend/.venv/
+backend/.venv-risksetu/
+.vercel-validation-deps/
+.pytest_cache/
+**/__pycache__/
+frontend/dist/

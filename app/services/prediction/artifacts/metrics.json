@@ -1,0 +1,260 @@
+{
+  "model_version": "risksetu-landslide-susceptibility-v2",
+  "artifact_label": "EXPERIMENTAL \u2014 NOT PRODUCTION READY",
+  "validation_method": "2D Spatial Grid GroupKFold Cross-Validation",
+  "spatial_block_method": "2D lat\u00d7lon quantile grid (n_lat_bins=4, n_lon_bins=4)",
+  "n_folds": 5,
+  "geo_features_included": false,
+  "ablation": {
+    "roc_auc_with_geo_rf": 0.8623833709383345,
+    "roc_auc_no_geo_rf": 0.6161224435341834,
+    "roc_auc_drop_rf": 0.24626092740415106,
+    "interpretation": "Geographic memorization"
+  },
+  "buffer_sensitivity": [
+    {
+      "buffer_km": 3.0,
+      "n_negatives": 33022,
+      "n_valid_folds": 5,
+      "roc_auc": 0.835773686953241,
+      "pr_auc": 0.794969760679503,
+      "f1": 0.573417410531488
+    },
+    {
+      "buffer_km": 5.0,
+      "n_negatives": 33022,
+      "n_valid_folds": 5,
+      "roc_auc": 0.8425625366359383,
+      "pr_auc": 0.8084476196851442,
+      "f1": 0.5558308486960903
+    },
+    {
+      "buffer_km": 10.0,
+      "n_negatives": 33022,
+      "n_valid_folds": 5,
+      "roc_auc": 0.8638478822521531,
+      "pr_auc": 0.8424643845350901,
+      "f1": 0.6952384520286218
+    }
+  ],
+  "best_model": "RandomForest",
+  "models_compared": {
+    "RF_with_geo": {
+      "model_name": "RF_with_geo",
+      "roc_auc": 0.8623833709383345,
+      "pr_auc": 0.8193955010454843,
+      "precision": 0.9190167892022386,
+      "recall": 0.5072375991763067,
+      "f1": 0.6536840462066812,
+      "brier_score": 0.13979906735651237,
+      "confusion_matrix": [
+        [
+          32284,
+          738
+        ],
+        [
+          8136,
+          8375
+        ]
+      ],
+      "n_valid_folds": 5,
+      "n_total_folds": 5
+    },
+    "HGB_with_geo": {
+      "model_name": "HGB_with_geo",
+      "roc_auc": 0.8540641913930475,
+      "pr_auc": 0.8214751564686522,
+      "precision": 0.8854055968827489,
+      "recall": 0.6055357034704136,
+      "f1": 0.7192029637089523,
+      "brier_score": 0.13319910605364652,
+      "confusion_matrix": [
+        [
+          31728,
+          1294
+        ],
+        [
+          6513,
+          9998
+        ]
+      ],
+      "n_valid_folds": 5,
+      "n_total_folds": 5
+    },
+    "RF_no_geo": {
+      "model_name": "RF_no_geo",
+      "roc_auc": 0.6161224435341834,
+      "pr_auc": 0.5535791194916213,
+      "precision": 0.6539972797340184,
+      "recall": 0.5241959905517534,
+      "f1": 0.5819465456379224,
+      "brier_score": 0.2244524077870337,
+      "confusion_matrix": [
+        [
+          28443,
+          4579
+        ],
+        [
+          7856,
+          8655
+        ]
+      ],
+      "n_valid_folds": 5,
+      "n_total_folds": 5
+    },
+    "HGB_no_geo": {
+      "model_name": "HGB_no_geo",
+      "roc_auc": 0.6003779629154388,
+      "pr_auc": 0.5401277019914061,
+      "precision": 0.7088685643818724,
+      "recall": 0.4177820846708255,
+      "f1": 0.5257221248380459,
+      "brier_score": 0.213008779578679,
+      "confusion_matrix": [
+        [
+          30189,
+          2833
+        ],
+        [
+          9613,
+          6898
+        ]
+      ],
+      "n_valid_folds": 5,
+      "n_total_folds": 5
+    }
+  },
+  "best_model_overall_metrics": {
+    "model_name": "RF_no_geo",
+    "roc_auc": 0.6161224435341834,
+    "pr_auc": 0.5535791194916213,
+    "precision": 0.6539972797340184,
+    "recall": 0.5241959905517534,
+    "f1": 0.5819465456379224,
+    "brier_score": 0.2244524077870337,
+    "confusion_matrix": [
+      [
+        28443,
+        4579
+      ],
+      [
+        7856,
+        8655
+      ]
+    ],
+    "n_valid_folds": 5,
+    "n_total_folds": 5
+  },
+  "best_model_fold_metrics": [
+    {
+      "fold": 0,
+      "status": "VALID",
+      "reason": null,
+      "n_train": 36053,
+      "n_val": 13480,
+      "n_pos_val": 5347,
+      "n_neg_val": 8133,
+      "roc_auc": 0.6561008560896529,
+      "pr_auc": 0.5371684039582887,
+      "precision": 0.9956663055254604,
+      "recall": 0.17187207780063588,
+      "f1": 0.2931419457735247,
+      "brier": 0.2645222343833295
+    },
+    {
+      "fold": 1,
+      "status": "VALID",
+      "reason": null,
+      "n_train": 37333,
+      "n_val": 12200,
+      "n_pos_val": 641,
+      "n_neg_val": 6009,
+      "roc_auc": 0.6197701928379198,
+      "pr_auc": 0.6861176157851875,
+      "precision": 0.6677165354330709,
+      "recall": 0.6351108448172559,
+      "f1": 0.6510056809458007,
+      "brier": 0.32823448120075466
+    },
+    {
+      "fold": 2,
+      "status": "VALID",
+      "reason": null,
+      "n_train": 40422,
+      "n_val": 9111,
+      "n_pos_val": 1852,
+      "n_neg_val": 7259,
+      "roc_auc": 0.8783878774751057,
+      "pr_auc": 0.5131151645342682,
+      "precision": 0.5068418171866448,
+      "recall": 1.0,
+      "f1": 0.6727206683617871,
+      "brier": 0.1574175248830352
+    },
+    {
+      "fold": 3,
+      "status": "VALID",
+      "reason": null,
+      "n_train": 41441,
+      "n_val": 8092,
+      "n_pos_val": 6676,
+      "n_neg_val": 5524,
+      "roc_auc": 0.8576590730557738,
+      "pr_auc": 0.6306127961134652,
+      "precision": 0.7126137841352406,
+      "recall": 0.8240601503759398,
+      "f1": 0.7642956764295676,
+      "brier": 0.16415521045156242
+    },
+    {
+      "fold": 4,
+      "status": "VALID",
+      "reason": null,
+      "n_train": 42883,
+      "n_val": 6650,
+      "n_pos_val": 1995,
+      "n_neg_val": 6097,
+      "roc_auc": 0.5758861707438842,
+      "pr_auc": 0.11171139769954688,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier": 0.11804596881131964
+    }
+  ],
+  "calibration_curve": {
+    "bin_true_fraction": [
+      0.3343410746186615,
+      0.39627707177376054,
+      0.061511750480560554,
+      0.0017431725740848344,
+      0.5015700827861833,
+      0.37507179781734634,
+      0.7861579414374446,
+      0.7782599262312866
+    ],
+    "bin_predicted_mean": [
+      0.026923676805465237,
+      0.11653106157207162,
+      0.3266123561457691,
+      0.40909081186589236,
+      0.5134700409580577,
+      0.7383221121279753,
+      0.8820637429223532,
+      0.9111626373918315
+    ],
+    "approximately_monotonic": false,
+    "n_valid_folds_used": 5
+  },
+  "scientific_validity": {
+    "verdict": "MODEL NOT YET VALID \u2014 REQUIRES ADDITIONAL FEATURES",
+    "all_folds_valid": true,
+    "n_valid_folds": 5,
+    "roc_acceptable": true,
+    "calibration_monotonic": false,
+    "environmental_signal_sufficient": true,
+    "reasons": [
+      "Calibration curve non-monotonic \u2014 output not reliable as probability"
+    ]
+  }
+}

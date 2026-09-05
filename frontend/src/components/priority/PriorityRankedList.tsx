@@ -9,7 +9,21 @@ export function PriorityRankedList() {
     selectedPriorityId,
     selectPriority,
     setWorkflowTab,
+    selectedLocation,
+    evaluateLocationPriority,
+    priorityLoading,
+    priorityError,
   } = useMapContext();
+
+  const handleEvaluateCurrent = () => {
+    if (selectedLocation) {
+      evaluateLocationPriority(
+        selectedLocation.latitude,
+        selectedLocation.longitude,
+        selectedLocation.name,
+      );
+    }
+  };
 
   return (
     <div className="prio-panel" role="region" aria-label="Ranked Intervention Priority">
@@ -67,6 +81,29 @@ export function PriorityRankedList() {
         </div>
       </div>
 
+      {/* ── INTERACTIVE EVALUATE TRIGGER BAR ── */}
+      {selectedLocation && (
+        <div className="prio-eval-bar">
+          <button
+            className="prio-eval-btn font-mono"
+            onClick={handleEvaluateCurrent}
+            disabled={priorityLoading}
+          >
+            {priorityLoading ? (
+              <span>EVALUATING PRIORITY VIA BACKEND...</span>
+            ) : (
+              <span>⚡ EVALUATE PRIORITY: {selectedLocation.name ? selectedLocation.name.slice(0, 22) : 'SELECTED LOCATION'}</span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {priorityError && (
+        <div className="prio-error-banner font-mono">
+          ⚠ {priorityError}
+        </div>
+      )}
+
       {/* ── RANKED INTERVENTION LIST ── */}
       <div className="prio-panel__body">
         <div className="prio-panel__list-header font-mono">
@@ -74,81 +111,123 @@ export function PriorityRankedList() {
           <span>WEIGHTED FORMULA</span>
         </div>
 
-        <div className="prio-list">
-          {priorityList.map((item) => {
-            const isSelected = selectedPriorityId === item.id;
-            return (
-              <div
-                key={item.id}
-                className={`prio-card ${isSelected ? 'prio-card--selected' : ''}`}
-                onClick={() => selectPriority(item.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    selectPriority(item.id);
-                  }
-                }}
-              >
-                <div className="prio-card__top">
-                  <div className="prio-card__rank-group">
-                    <span className="prio-card__rank font-mono">
-                      {String(item.rank).padStart(2, '0')}
-                    </span>
-                    <div className="prio-card__name-block">
-                      <span className="prio-card__name">{item.location}</span>
-                      <span className="prio-card__sub">{item.subdivision}</span>
+        {priorityList.length === 0 ? (
+          <div className="prio-empty-state">
+            <div className="prio-empty-state__icon">📊</div>
+            <div className="prio-empty-state__title font-mono">NO TARGETS EVALUATED YET</div>
+            <p className="prio-empty-state__desc">
+              Select any point or landslide on the map and click <strong>Evaluate Priority</strong> to calculate multi-criteria intervention priority via the certified backend engine.
+            </p>
+          </div>
+        ) : (
+          <div className="prio-list">
+            {priorityList.map((item) => {
+              const isSelected = selectedPriorityId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className={`prio-card ${isSelected ? 'prio-card--selected' : ''}`}
+                  onClick={() => selectPriority(item.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      selectPriority(item.id);
+                    }
+                  }}
+                >
+                  <div className="prio-card__top">
+                    <div className="prio-card__rank-group">
+                      <span className="prio-card__rank font-mono">
+                        {String(item.rank).padStart(2, '0')}
+                      </span>
+                      <div className="prio-card__name-block">
+                        <span className="prio-card__name">{item.location}</span>
+                        <span className="prio-card__sub">{item.subdivision}</span>
+                      </div>
+                    </div>
+
+                    <Badge
+                      variant="risk"
+                      riskLevel={item.priorityLevel === 'CRITICAL' ? 'CRITICAL' : item.priorityLevel === 'HIGH' ? 'HIGH' : 'MODERATE'}
+                      size="sm"
+                      dot
+                      pulse={item.priorityLevel === 'CRITICAL'}
+                    >
+                      {item.priorityLevel} PRIORITY
+                    </Badge>
+                  </div>
+
+                  {/* Metric Strip */}
+                  <div className="prio-card__metrics font-mono">
+                    <div className="prio-card__metric">
+                      <span className="prio-card__metric-label">Risk</span>
+                      <span className="prio-card__metric-val">{item.riskScore.toFixed(1)}</span>
+                    </div>
+                    <div className="prio-card__metric-divider" aria-hidden="true">·</div>
+                    <div className="prio-card__metric">
+                      <span className="prio-card__metric-label">Isolation</span>
+                      <span className={`prio-card__metric-val prio-card__metric-val--${item.isolationSeverity.toLowerCase()}`}>
+                        +{item.isolationNodes} nodes
+                      </span>
+                    </div>
+                    <div className="prio-card__metric-divider" aria-hidden="true">·</div>
+                    <div className="prio-card__metric">
+                      <span className="prio-card__metric-label">Score</span>
+                      <span className="prio-card__metric-val prio-card__metric-val--score">
+                        {item.priorityScore.toFixed(1)}
+                      </span>
                     </div>
                   </div>
 
-                  <Badge
-                    variant="risk"
-                    riskLevel={item.priorityLevel === 'CRITICAL' ? 'CRITICAL' : item.priorityLevel === 'HIGH' ? 'HIGH' : 'MODERATE'}
-                    size="sm"
-                    dot
-                    pulse={item.priorityLevel === 'CRITICAL'}
-                  >
-                    {item.priorityLevel} PRIORITY
-                  </Badge>
-                </div>
+                  {/* Rationale & Contrast Note */}
+                  <p className="prio-card__reason">
+                    {item.contrastReason}
+                  </p>
 
-                {/* Metric Strip */}
-                <div className="prio-card__metrics font-mono">
-                  <div className="prio-card__metric">
-                    <span className="prio-card__metric-label">Risk</span>
-                    <span className="prio-card__metric-val">{item.riskScore.toFixed(1)}</span>
-                  </div>
-                  <div className="prio-card__metric-divider" aria-hidden="true">·</div>
-                  <div className="prio-card__metric">
-                    <span className="prio-card__metric-label">Isolation</span>
-                    <span className={`prio-card__metric-val prio-card__metric-val--${item.isolationSeverity.toLowerCase()}`}>
-                      +{item.isolationNodes} nodes
-                    </span>
-                  </div>
-                  <div className="prio-card__metric-divider" aria-hidden="true">·</div>
-                  <div className="prio-card__metric">
-                    <span className="prio-card__metric-label">Score</span>
-                    <span className="prio-card__metric-val prio-card__metric-val--score">
-                      {item.priorityScore.toFixed(1)}
-                    </span>
-                  </div>
-                </div>
+                  {/* Breakdown detail when selected */}
+                  {isSelected && item.riskContribution !== undefined && (
+                    <div className="prio-card__breakdown font-mono">
+                      <div className="prio-card__breakdown-item">
+                        <span>Risk 40%:</span> <strong>{item.riskContribution.toFixed(1)}</strong>
+                      </div>
+                      <div className="prio-card__breakdown-item">
+                        <span>Impact 45%:</span> <strong>{(item.isolationContribution ?? 0).toFixed(1)}</strong>
+                      </div>
+                      <div className="prio-card__breakdown-item">
+                        <span>Urgency 15%:</span> <strong>{(item.urgencyContribution ?? 0).toFixed(1)}</strong>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Rationale & Contrast Note */}
-                <p className="prio-card__reason">
-                  {item.contrastReason}
-                </p>
+                  {/* Limitations if present */}
+                  {isSelected && item.limitations && item.limitations.length > 0 && (
+                    <div className="prio-card__limits font-mono">
+                      {item.limitations.map((lim, i) => (
+                        <span key={i} className="prio-card__limit-tag">{lim}</span>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Corridor Link */}
-                <div className="prio-card__corridor font-mono">
-                  <span>CORRIDOR: {item.adjacentCorridor}</span>
-                  <span className="prio-card__jump">Inspect →</span>
+                  {/* Corridor Link */}
+                  {item.adjacentCorridor && (
+                    <div className="prio-card__corridor font-mono">
+                      <span>CORRIDOR: {item.adjacentCorridor}</span>
+                      <span className="prio-card__jump">Inspect →</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── FOOTER: PROVENANCE & FORMULA ── */}
+      <div className="prio-panel__footer font-mono">
+        PRIORITY FORMULA: (Risk × 0.40) + (Impact × 0.45) + (Urgency × 0.15) · FASTAPI BACKEND
       </div>
     </div>
   );
 }
+

@@ -27,6 +27,8 @@ export interface GroundObservation {
   latitude: number;
   longitude: number;
   status: 'VERIFIED' | 'REVIEW_PENDING';
+  evidenceId?: string;
+  photoUrl?: string;
 }
 
 export const MOCK_GROUND_OBSERVATIONS: GroundObservation[] = [

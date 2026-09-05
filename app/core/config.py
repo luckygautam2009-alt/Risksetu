@@ -85,6 +85,40 @@ class Settings(BaseSettings):
     # --- Demo / offline mode (Constitution rule #4: external data is disposable) ---
     offline_demo_mode: bool = True
 
+    # --- Weather service (Open-Meteo) ---
+    weather_timeout_seconds: float = Field(
+        default=8.0,
+        description="HTTP timeout in seconds for weather provider requests.",
+    )
+    weather_max_retries: int = Field(
+        default=3,
+        description="Maximum number of retry attempts for failed weather requests.",
+    )
+    weather_cache_ttl_seconds: int = Field(
+        default=300,
+        description="Redis TTL in seconds for cached weather responses (default 5 min).",
+    )
+
+    # --- Identity Verification Providers (Phase 1) ---
+    digilocker_client_id: str | None = None
+    digilocker_client_secret: str | None = None
+    digilocker_redirect_uri: str | None = None
+
+    aadhaar_provider_enabled: bool = False
+    aadhaar_environment: str = "sandbox"
+    aadhaar_client_id: str | None = None
+    aadhaar_client_secret: str | None = None
+    aadhaar_provider_url: str | None = None
+
+    # --- Evidence Storage (Phase 1) ---
+    evidence_upload_dir: str = "storage/evidence"
+    evidence_max_size_bytes: int = 10 * 1024 * 1024  # 10 MB
+
+    # --- Emergency Notification Providers (Phase 2) ---
+    sms_gateway_url: str | None = None
+    sms_gateway_api_key: str | None = None
+    sms_sender_id: str | None = None
+
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"

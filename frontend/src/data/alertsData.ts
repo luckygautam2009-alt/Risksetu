@@ -34,6 +34,9 @@ export interface SpatialAlert {
   triggeredAt: string;
   acknowledgedBy?: string;
   resolvedBy?: string;
+  priorityScore?: number;
+  recommendedAction?: string;
+  alertType?: string;
 }
 
 export const MOCK_ALERTS: SpatialAlert[] = [

@@ -43,6 +43,15 @@ export const MAP_LAYER_IDS = {
   alertsPulse: 'alerts-pulse',
   alerts: 'alerts-layer',
   alertsLabel: 'alerts-label',
+  sosPulse: 'sos-pulse',
+  sos: 'sos-layer',
+  sosLabel: 'sos-label',
+  landslidesClusters: 'landslides-clusters',
+  landslidesClusterCount: 'landslides-cluster-count',
+  landslidesUnclustered: 'landslides-unclustered',
+  landslidesLabel: 'landslides-label',
+  liveRiskMarkerPulse: 'live-risk-marker-pulse',
+  liveRiskMarker: 'live-risk-marker',
 } as const;
 
 export const MAP_SOURCE_IDS = {
@@ -51,5 +60,8 @@ export const MAP_SOURCE_IDS = {
   impactNodes: 'impact-nodes-source',
   groundIntel: 'ground-intel-source',
   alerts: 'alerts-source',
+  sos: 'sos-source',
+  landslides: 'landslides-source',
+  liveRiskPoint: 'live-risk-point-source',
 } as const;
 

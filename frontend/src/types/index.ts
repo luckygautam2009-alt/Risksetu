@@ -1,12 +1,18 @@
 export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
 
 export type LayerId =
+  | 'live-risk'
+  | 'historical-landslides'
+  | 'community-signals'
+  | 'sos'
+  | 'alerts'
+  | 'road-network'
+  | 'road-risk'
   | 'landslides'
   | 'risk'
   | 'rainfall'
   | 'roads'
   | 'ground-intelligence'
-  | 'alerts'
   | 'terrain';
 
 export type SystemStatus = 'operational' | 'degraded' | 'offline' | 'calibrating';
@@ -33,18 +39,8 @@ export interface Hazard {
   terrain: string;
 }
 
-export interface GeoJsonFeature<P = Record<string, unknown>> {
-  type: 'Feature';
-  id?: string | number;
-  geometry: {
-    type: 'Point' | 'Polygon' | 'LineString';
-    coordinates: number[] | number[][] | number[][][];
-  };
-  properties: P;
-}
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
 
-export interface GeoJsonFeatureCollection<P = Record<string, unknown>> {
-  type: 'FeatureCollection';
-  features: GeoJsonFeature<P>[];
-}
+export type GeoJsonFeature<P = Record<string, unknown>> = Feature<Geometry, P>;
+export type GeoJsonFeatureCollection<P = Record<string, unknown>> = FeatureCollection<Geometry, P>;
 

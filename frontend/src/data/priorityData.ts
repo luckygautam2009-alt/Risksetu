@@ -24,13 +24,18 @@ export interface PriorityItem {
   priorityScore: number; // 0-100
   riskScore: number; // 0-100
   isolationSeverity: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
-  isolationNodes: number; // e.g. +42 nodes
-  urgency: 'IMMEDIATE' | 'ELEVATED' | 'STANDARD' | 'ROUTINE';
-  contrastReason: string; // Explains why Risk ≠ Priority here
-  latitude: number;
-  longitude: number;
-  adjacentCorridor: string;
-  wayId: string;
+  isolationNodes?: number;
+  urgency?: 'IMMEDIATE' | 'ELEVATED' | 'STANDARD' | 'ROUTINE';
+  contrastReason?: string;
+  latitude?: number;
+  longitude?: number;
+  adjacentCorridor?: string;
+  wayId?: string;
+  riskContribution?: number;
+  isolationContribution?: number;
+  urgencyContribution?: number;
+  rationale?: string;
+  limitations?: string[];
 }
 
 export const RANKED_PRIORITY_LIST: PriorityItem[] = [

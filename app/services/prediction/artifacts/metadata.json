@@ -1,0 +1,95 @@
+{
+  "model_version": "risksetu-landslide-susceptibility-v2",
+  "artifact_label": "EXPERIMENTAL \u2014 NOT PRODUCTION READY",
+  "model_type": "RandomForest",
+  "model_params": {
+    "n_estimators": 150,
+    "max_depth": 10,
+    "min_samples_leaf": 5,
+    "random_state": 42,
+    "n_jobs": -1,
+    "class_weight": "balanced"
+  },
+  "calibration_method": "sigmoid (Platt scaling) via CalibratedClassifierCV (valid folds only)",
+  "training_timestamp": "2026-09-04T18:59:20.341800+00:00",
+  "training_duration_seconds": 33.81,
+  "random_seed": 42,
+  "sklearn_version": "1.9.0",
+  "target_definition": {
+    "name": "landslide_susceptibility",
+    "y_1": "GSI Bhukosh NLSM historical landslide presence location",
+    "y_0": "Pseudo-absence background sample (min exclusion buffer from any known slide)"
+  },
+  "dataset": {
+    "source_positive": "Geological Survey of India (GSI) Bhukosh NLSM PDF Inventory",
+    "source_negative": "Algorithmically generated pseudo-absence within Himalayan domain",
+    "source_climatology": "India Meteorological Department (IMD) Subdivision Climatology 1901-2017",
+    "positive_samples": 16511,
+    "negative_samples": 33022,
+    "total_samples": 49533,
+    "positive_negative_ratio": "1:2.0",
+    "exclusion_buffer_km": 5.0,
+    "unknown_state_positives": 7144,
+    "heuristic_subdiv_positives": 7144
+  },
+  "modeling_domain": {
+    "lat_min": 26.0,
+    "lat_max": 36.0,
+    "lon_min": 74.0,
+    "lon_max": 90.0
+  },
+  "feature_names": [
+    "annual_rainfall_mean_mm",
+    "monsoon_rainfall_mean_mm",
+    "winter_rainfall_mean_mm",
+    "pre_monsoon_rainfall_mean_mm",
+    "post_monsoon_rainfall_mean_mm",
+    "monsoon_variability_mm",
+    "rainfall_seasonality_ratio"
+  ],
+  "feature_count": 7,
+  "feature_importance": {
+    "annual_rainfall_mean_mm": 0.21122344681239266,
+    "monsoon_rainfall_mean_mm": 0.19554002717749447,
+    "winter_rainfall_mean_mm": 0.21951279372992114,
+    "pre_monsoon_rainfall_mean_mm": 0.0558550087809822,
+    "post_monsoon_rainfall_mean_mm": 0.04184218599524042,
+    "monsoon_variability_mm": 0.15814221344677698,
+    "rainfall_seasonality_ratio": 0.1178843240571923
+  },
+  "geo_features_included": false,
+  "feature_selection_reason": "Model B (rainfall-only) has 5 valid folds and ROC-AUC=0.6161 \u2265 0.55. Preferred over Model A to avoid geographic memorization.",
+  "spatial_validation": {
+    "method": "2D Spatial Grid GroupKFold",
+    "n_folds": 5,
+    "block_assignment": "2D lat\u00d7lon quantile grid (n_lat_bins=4, n_lon_bins=4)",
+    "fold_validity_enforced": true,
+    "min_positives_per_fold": 1,
+    "min_negatives_per_fold": 1,
+    "n_valid_folds": 5
+  },
+  "output_semantics": {
+    "type": "susceptibility_score",
+    "range": "[0.0, 1.0]",
+    "interpretation": "Estimated landslide susceptibility score. Higher values indicate locations with environmental characteristics more similar to known historical landslide sites. This is NOT a guaranteed future event probability. Calibration is approximate; do not treat as frequentist probability without terrain features."
+  },
+  "artifact_files": {
+    "pipeline": "pipeline.joblib",
+    "features": "features.json",
+    "metadata": "metadata.json",
+    "metrics": "metrics.json"
+  },
+  "artifact_size_kb": 574.5,
+  "inference_latency_ms": 70.63,
+  "scientific_validity_verdict": "MODEL NOT YET VALID \u2014 REQUIRES ADDITIONAL FEATURES",
+  "limitations": [
+    "GSI is a presence-only historical inventory; pseudo-absence samples are background assumptions, not confirmed non-landslide observations.",
+    "No DEM/topography features (elevation, slope, aspect, curvature) are available. terrain_features_available = false.",
+    "No dynamic/antecedent rainfall features. Only long-term climatological baselines are used. dynamic_weather_features_available = false.",
+    "~7144 of 16511 positive records (43.3%) have state='Unknown' \u2014 their IMD subdivision was assigned via coordinate heuristic, not authoritative administrative boundaries.",
+    "Geographic-to-subdivision mapping uses a coarse latitude/longitude heuristic rather than administrative boundary polygons. Future phases should use a GIS polygon join.",
+    "Model estimates spatial susceptibility, not guaranteed future occurrence probability.",
+    "IMD climatology has subdivision-level granularity (~15 zones over the domain). Within-subdivision variation is not captured by rainfall features.",
+    "GSI survey coverage is spatially uneven \u2014 high-density regions may reflect survey effort as much as true susceptibility."
+  ]
+}

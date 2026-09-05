@@ -550,3 +550,165 @@
 }
 
 
+
+/* ── Live data additions ─────────────────────────────────────────────────── */
+
+.rp__offline-tag {
+  color: var(--color-text-tertiary, #7a8899);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.rp__loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+.rp__loading-label { font-size: 11px; color: var(--color-text-secondary, #b0bec5); }
+.rp__loading-spinner {
+  width: 12px; height: 12px;
+  border: 2px solid var(--color-border-subtle, #2a3240);
+  border-top-color: var(--color-geo-blue, #4e9af1);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.rp__loading-text { font-size: 11px; color: var(--color-text-tertiary, #7a8899); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.rp__unavail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 0;
+}
+.rp__unavail-label { font-size: 11px; color: var(--color-text-secondary, #b0bec5); }
+.rp__unavail-tag {
+  font-size: 9px;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text-tertiary, #7a8899);
+  background: rgba(120,130,140,0.12);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+.rp__unavail-reason { font-size: 10px; color: var(--color-text-tertiary, #7a8899); }
+.rp__unavail-text { color: var(--color-text-tertiary, #7a8899); font-style: italic; }
+
+.rp__elev--unavail { color: var(--color-text-tertiary, #7a8899); font-size: 10px; }
+
+.rp__error-note {
+  font-size: 10px;
+  color: var(--color-risk-moderate, #b0821e);
+  padding: 4px 0;
+}
+
+/* Weather grid */
+.rp__weather-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 8px;
+  margin: 6px 0;
+}
+.rp__weather-item { display: flex; flex-direction: column; gap: 1px; }
+.rp__weather-label { font-size: 9px; color: var(--color-text-tertiary, #7a8899); font-family: var(--font-mono, monospace); text-transform: uppercase; }
+.rp__weather-val { font-size: 12px; color: var(--color-text-primary, #e2e8f0); font-weight: 600; }
+
+/* Forecast strip */
+.rp__forecast {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 5px 0;
+  border-top: 1px solid var(--color-border-subtle, #1a2333);
+}
+.rp__forecast-day { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.rp__forecast-label { font-size: 9px; color: var(--color-text-tertiary, #7a8899); font-family: var(--font-mono, monospace); }
+.rp__forecast-precip { font-size: 11px; color: var(--color-geo-blue, #4e9af1); font-weight: 600; }
+
+/* SOS elements */
+.rp__action--sos-trigger {
+  background: rgba(180, 50, 50, 0.15);
+  border-color: rgba(180, 50, 50, 0.4);
+  color: #f87171;
+  font-weight: 600;
+}
+.rp__action--sos-trigger:hover {
+  background: rgba(180, 50, 50, 0.25);
+}
+
+.rp__sos-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  text-align: center;
+}
+.rp__sos-done-icon {
+  font-size: 28px;
+  color: #4ade80;
+}
+.rp__sos-done-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4ade80;
+  font-family: var(--font-mono, monospace);
+}
+.rp__sos-done-text { font-size: 12px; color: var(--color-text-secondary, #b0bec5); }
+.rp__sos-id { font-size: 10px; color: var(--color-text-tertiary, #7a8899); font-family: var(--font-mono, monospace); }
+
+.rp__sos-form { display: flex; flex-direction: column; gap: 8px; }
+.rp__sos-prompt { font-size: 12px; color: var(--color-text-secondary, #b0bec5); line-height: 1.5; }
+.rp__sos-risk {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  background: rgba(180, 50, 50, 0.12);
+}
+.rp__sos-risk--critical { color: #f87171; }
+.rp__sos-risk--high { color: #fb923c; }
+.rp__sos-risk--moderate { color: #fbbf24; }
+.rp__sos-risk--low { color: #4ade80; }
+
+.rp__sos-label {
+  font-size: 10px;
+  color: var(--color-text-tertiary, #7a8899);
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+}
+.rp__sos-select {
+  width: 100%;
+  background: var(--color-bg-panel, #0d1623);
+  border: 1px solid var(--color-border-subtle, #1a2333);
+  color: var(--color-text-primary, #e2e8f0);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.rp__sos-textarea {
+  width: 100%;
+  background: var(--color-bg-panel, #0d1623);
+  border: 1px solid var(--color-border-subtle, #1a2333);
+  color: var(--color-text-primary, #e2e8f0);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11px;
+  resize: vertical;
+  font-family: inherit;
+}
+.rp__sos-error {
+  font-size: 11px;
+  color: #f87171;
+  background: rgba(180, 50, 50, 0.12);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+.rp__action--sos {
+  background: rgba(180, 50, 50, 0.18);
+  border-color: rgba(180, 50, 50, 0.5);
+  color: #f87171;
+  font-weight: 700;
+}
+.rp__action--sos:disabled { opacity: 0.5; cursor: not-allowed; }

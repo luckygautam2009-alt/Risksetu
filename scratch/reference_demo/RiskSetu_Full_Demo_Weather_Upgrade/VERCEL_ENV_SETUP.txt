@@ -1,0 +1,33 @@
+RiskSetu environment variables
+==============================
+
+Required for demo/local persistence:
+DATA_MODE=mock
+
+Weather:
+OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1/forecast
+INDIANAPI_KEY=<optional fallback key>
+INDIANAPI_WEATHER_BASE_URL=https://weather.indianapi.in
+WEATHER_CACHE_SECONDS=900
+WEATHER_STALE_CACHE_SECONDS=3600
+
+Maps/routing:
+OSRM_BASE_URL=https://router.project-osrm.org
+
+Optional NASA IMERG satellite accumulation:
+PPS_USERNAME=<NASA PPS username>
+PPS_PASSWORD=<NASA PPS password>
+NASA_IMERG_PPS_BASE_URL=https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/early/
+IMERG_CACHE_SECONDS=1800
+EARTHDATA_TOKEN=<optional / reserved for Earthdata integrations>
+
+Production CORS if frontend/backend are on different origins:
+CORS_ORIGINS=https://your-domain.example
+
+Do NOT use:
+GOOGLE_MAPS_API_KEY
+IMD_API_KEY
+IMD_API_BASE_URL
+IMD_ENDPOINT
+
+Never expose PPS_PASSWORD, INDIANAPI_KEY, EARTHDATA_TOKEN, GEMINI_API_KEY or SUPABASE service/secret keys through VITE_ variables.

@@ -80,6 +80,11 @@ class ForbiddenError(AppError):
     status_code = status.HTTP_403_FORBIDDEN
 
 
+class IdentityVerificationRequiredError(AppError):
+    code = "IDENTITY_VERIFICATION_REQUIRED"
+    status_code = status.HTTP_403_FORBIDDEN
+
+
 class UnauthorizedError(AppError):
     code = "UNAUTHORIZED"
     status_code = status.HTTP_401_UNAUTHORIZED

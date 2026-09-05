@@ -9,12 +9,12 @@ const SEQUENCE_STEPS = [
   { id: 'hazard', label: 'HAZARD', sub: 'Mass Inflow' },
   { id: 'failure', label: 'ROAD FAILURE', sub: 'Way Severed' },
   { id: 'disruption', label: 'NETWORK DISRUPTION', sub: 'Topological Split' },
-  { id: 'isolation', label: 'ISOLATION', sub: '42 Nodes Cutoff' },
-  { id: 'impact', label: 'IMPACT', sub: 'Critical Severity' },
+  { id: 'isolation', label: 'ISOLATION', sub: 'Nodes Cutoff' },
+  { id: 'impact', label: 'IMPACT', sub: 'Severity Assessed' },
 ] as const;
 
 export function RoadImpactPanel() {
-  const { simulationResult, resetSimulation, startSimulation, selectedRoad } = useMapContext();
+  const { simulationResult, resetSimulation, startSimulation, selectedRoad, backendSimulation } = useMapContext();
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -38,10 +38,15 @@ export function RoadImpactPanel() {
         <div className="impact-panel__title-block">
           <div className="impact-panel__overline font-mono">
             <span className="impact-panel__pulse-dot" aria-hidden="true" />
-            ROAD FAILURE
+            WHAT-IF SIMULATION — NOT A CONFIRMED CLOSURE
           </div>
           <h2 className="impact-panel__way font-mono">Way {simulationResult.wayId}</h2>
           <p className="impact-panel__corridor">{simulationResult.roadName}</p>
+          {backendSimulation.state === 'unavailable' && (
+            <p className="impact-panel__disclaimer font-mono">
+              ⚠ Road network data unavailable in this area — topology estimated.
+            </p>
+          )}
         </div>
 
         <IconButton
@@ -159,7 +164,7 @@ export function RoadImpactPanel() {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <span>Emergency transit to medical facilities delayed by estimated 8.4 hours via foot reconnaissance.</span>
+              <span>Simulation — Not a confirmed road closure. Connectivity assessment only.</span>
             </div>
           </div>
         </section>

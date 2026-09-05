@@ -7,6 +7,7 @@ import datetime
 from enum import Enum
 import math
 from typing import Any
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -89,6 +90,7 @@ class GroundReportCreateRequest(BaseModel):
     description: str = Field(..., min_length=10, max_length=2000, description="Descriptive text of observed hazard")
     observed_at: datetime.datetime = Field(..., description="Timestamp when observation was made")
     source_metadata: dict[str, Any] | None = Field(None, description="Optional telemetry or device provenance")
+    evidence_id: uuid.UUID | None = Field(None, description="Optional verified photographic evidence ID")
 
     @field_validator("latitude", "longitude")
     @classmethod

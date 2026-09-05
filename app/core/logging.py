@@ -35,10 +35,18 @@ _SENSITIVE_KEY_PATTERNS = {
     "cookie",
     "credential",
     "report_content",
+    "aadhaar",
+    "uidai",
+    "otp",
+    "biometric",
+    "kyc",
+    "id_token",
+    "identity_raw",
 }
 
 _BEARER_REGEX = re.compile(r"^(Bearer\s+)[A-Za-z0-9_\-\.]+$", re.IGNORECASE)
 _JWT_REGEX = re.compile(r"^[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+$")
+_AADHAAR_REGEX = re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b")
 
 
 def _is_sensitive_key(key: str) -> bool:
@@ -53,8 +61,11 @@ def _redact_value(key: str, val: Any) -> Any:
         return [_redact_value(key, item) for item in val]
     if _is_sensitive_key(key):
         return "***REDACTED***"
-    if isinstance(val, str) and (_BEARER_REGEX.match(val) or _JWT_REGEX.match(val)):
-        return "***REDACTED***"
+    if isinstance(val, str):
+        if _BEARER_REGEX.match(val) or _JWT_REGEX.match(val):
+            return "***REDACTED***"
+        if _AADHAAR_REGEX.search(val):
+            return _AADHAAR_REGEX.sub("***REDACTED-AADHAAR***", val)
     return val
 
 

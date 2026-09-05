@@ -1,12 +1,12 @@
 import { Badge } from '../ui/Badge';
-import { StatusIndicator } from './StatusIndicator';
+import { SystemStatusPanel } from '../common/SystemStatusPanel';
 import { useMapContext } from '../../context/MapContext';
 import './Header.css';
 
 const DATA_INDICATORS = ['GSI', 'IMD', 'OSM'] as const;
 
 export function Header() {
-  const { isDemoRunning } = useMapContext();
+  const { isDemoRunning, systemStatus, probeSystemReadiness } = useMapContext();
   return (
     <header className="header" role="banner">
       <div className="header__brand">
@@ -42,10 +42,9 @@ export function Header() {
           </span>
         )}
 
-        <StatusIndicator
-          status="operational"
-          label="SYSTEM OPERATIONAL"
-          size="sm"
+        <SystemStatusPanel
+          statusData={systemStatus}
+          onRefresh={probeSystemReadiness}
         />
 
         <div className="header__divider" aria-hidden="true" />
